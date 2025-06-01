@@ -1,0 +1,15 @@
+name = "personal-knowledge-mcp-server"
+main = "dist/worker.js"
+compatibility_date = "2023-12-01"
+
+[[kv_namespaces]]
+binding = "KNOWLEDGE_BASE_KV"
+id = "your-kv-namespace-id"
+preview_id = "your-preview-kv-namespace-id"
+
+[[r2_buckets]]
+binding = "KNOWLEDGE_BASE_R2"
+bucket_name = "personal-knowledge-base"
+
+[vars]
+ENVIRONMENT = "production"
