@@ -6,7 +6,7 @@
 
 const https = require('https');
 
-const SERVER_URL = 'https://public-knowledge-mcp-server.santhoshkumar199.workers.dev';
+const SERVER_URL = 'https://personal-knowledge-mcp-server.santhoshkumar199.workers.dev';
 
 console.error('Bridge script starting...');
 
@@ -18,9 +18,9 @@ function makeRequest(data) {
     const postData = JSON.stringify(data);
     
     const options = {
-      hostname: 'public-knowledge-mcp-server.santhoshkumar199.workers.dev',
+      hostname: 'personal-knowledge-mcp-server.santhoshkumar199.workers.dev',
       port: 443,
-      path: '/',
+      path: '/mcp/call',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

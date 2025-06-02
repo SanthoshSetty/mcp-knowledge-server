@@ -1,15 +1,11 @@
 name = "personal-knowledge-mcp-server"
-main = "dist/worker.js"
+main = "dist/chunked-fixed-worker.js"
 compatibility_date = "2023-12-01"
 
 [[kv_namespaces]]
 binding = "KNOWLEDGE_BASE_KV"
-id = "your-kv-namespace-id"
-preview_id = "your-preview-kv-namespace-id"
-
-[[r2_buckets]]
-binding = "KNOWLEDGE_BASE_R2"
-bucket_name = "personal-knowledge-base"
+id = "4d889b198acc48e59d7a1daf8d285a7c"
+preview_id = "6217aa250e4d44de97e913458a24acef"
 
 [vars]
 ENVIRONMENT = "production"

@@ -44,3 +44,20 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+
+# Upload scripts and logs (development only)
+upload-*.js
+upload-*.cjs
+upload-*.sh
+upload-log.txt
+test-*.js
+test-*.cjs
+bulk-upload-*.sh
+bulk-upload-*.js
+direct-upload.js
+
+# Backup files
+*.bak
+
+# Personal files and directories that were accidentally included
+../*
