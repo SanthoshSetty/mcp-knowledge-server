@@ -1,0 +1,58 @@
+{
+  "personal_knowledge_templates": {
+    "learning_notes": {
+      "template": {
+        "category": "learning-notes",
+        "title": "Course/Topic Name - Lesson/Chapter Title",
+        "content": "## Key Concepts\n\n- Concept 1: Explanation\n- Concept 2: Explanation\n\n## Code Examples\n\n```language\n// code example\n```\n\n## Takeaways\n\n- Important insight 1\n- Important insight 2\n\n## Next Steps\n\n- What to learn next\n- Projects to apply knowledge",
+        "tags": ["subject", "skill-level", "technology"],
+        "metadata": {
+          "course_name": "Course Title",
+          "instructor": "Instructor Name", 
+          "completion_date": "2024-06-01",
+          "source_url": "https://course-url.com"
+        }
+      },
+      "example": {
+        "category": "learning-notes",
+        "title": "TypeScript Masterclass - Advanced Types",
+        "content": "## Key Concepts\n\n- Union types: Allow variables to be one of several types\n- Intersection types: Combine multiple types into one\n- Conditional types: Types that depend on conditions\n\n## Code Examples\n\n```typescript\ntype ApiResponse<T> = T extends string ? string : T extends number ? number : never;\n```\n\n## Takeaways\n\n- Advanced types make code more type-safe\n- Conditional types enable powerful generic patterns\n\n## Next Steps\n\n- Practice with mapped types\n- Build a type-safe API client",
+        "tags": ["typescript", "advanced", "types", "programming"],
+        "metadata": {
+          "course_name": "TypeScript Masterclass",
+          "instructor": "John Doe",
+          "completion_date": "2024-05-20",
+          "source_url": "https://example-course.com"
+        }
+      }
+    },
+    "project_decisions": {
+      "template": {
+        "category": "project-decisions",
+        "title": "Project Name - Decision Topic",
+        "content": "## Context\n\nWhat situation led to this decision?\n\n## Options Considered\n\n1. Option A: Pros and cons\n2. Option B: Pros and cons\n3. Option C: Pros and cons\n\n## Decision\n\nChosen option and reasoning\n\n## Implementation\n\nHow the decision was implemented\n\n## Results\n\nOutcome and lessons learned",
+        "tags": ["project-name", "decision-type", "technology"],
+        "metadata": {
+          "project": "Project Name",
+          "decision_date": "2024-06-01",
+          "stakeholders": ["team-member-1", "team-member-2"],
+          "impact": "high|medium|low"
+        }
+      }
+    },
+    "meeting_notes": {
+      "template": {
+        "category": "meeting-notes", 
+        "title": "Meeting Name - Date",
+        "content": "## Attendees\n\n- Person 1\n- Person 2\n\n## Agenda\n\n1. Topic 1\n2. Topic 2\n\n## Discussion\n\n### Topic 1\nDiscussion points and outcomes\n\n### Topic 2  \nDiscussion points and outcomes\n\n## Action Items\n\n- [ ] Task 1 (Owner: Person, Due: Date)\n- [ ] Task 2 (Owner: Person, Due: Date)\n\n## Follow-up\n\nNext meeting date and topics",
+        "tags": ["meeting-type", "project", "team"],
+        "metadata": {
+          "meeting_date": "2024-06-01",
+          "meeting_type": "standup|planning|retrospective|review",
+          "attendees": ["person1", "person2"],
+          "duration": "30 minutes"
+        }
+      }
+    }
+  }
+}

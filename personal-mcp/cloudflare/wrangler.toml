@@ -1,0 +1,23 @@
+name = "personal-mcp-worker"
+main = "src/worker.ts"
+compatibility_date = "2024-11-01"
+
+[vars]
+# Environment variables will be set here
+
+[[kv_namespaces]]
+binding = "KNOWLEDGE_BASE"
+id = "6bd262f0b1554457a089495575eb69ff"
+preview_id = "ba74fe5051f9481f85cde414cfd8e4af"
+
+# R2 bucket - uncomment after creating bucket in Cloudflare dashboard
+# [[r2_buckets]]
+# binding = "FILES"
+# bucket_name = "personal-mcp-files"
+# preview_bucket_name = "personal-mcp-files-preview"
+
+[build]
+command = "npm run build"
+
+[dev]
+port = 8787

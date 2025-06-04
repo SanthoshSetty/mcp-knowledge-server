@@ -1,0 +1,58 @@
+{
+  "linkedin_data_export_template": {
+    "description": "Template for LinkedIn data export that can be imported into the knowledge base",
+    "posts": [
+      {
+        "id": "post-1",
+        "text": "Excited to share my thoughts on the future of AI in software development...",
+        "created_time": "2024-05-15T14:30:00Z",
+        "type": "post",
+        "engagement": {
+          "likes": 127,
+          "comments": 23,
+          "shares": 8
+        },
+        "topics": ["AI", "software-development", "future-tech"]
+      }
+    ],
+    "articles": [
+      {
+        "id": "article-1",
+        "title": "Building Personal AI Assistants: A Developer's Journey",
+        "summary": "In this article, I explore the process of creating AI-powered tools...",
+        "published_date": "2024-04-20T00:00:00Z",
+        "url": "https://linkedin.com/pulse/article-url",
+        "content": "Full article content here...",
+        "topics": ["AI", "development", "personal-tools"]
+      }
+    ],
+    "profile_updates": [
+      {
+        "type": "job_change",
+        "date": "2024-03-01T00:00:00Z",
+        "title": "Started new position as Senior AI Engineer",
+        "company": "Tech Innovation Corp",
+        "description": "Excited to join the AI team working on cutting-edge projects..."
+      }
+    ],
+    "mapping_instructions": {
+      "posts": {
+        "category": "linkedin-posts",
+        "title_field": "Auto-generated from first 50 chars of text",
+        "content_field": "text",
+        "tags_field": "topics"
+      },
+      "articles": {
+        "category": "linkedin-posts",
+        "title_field": "title", 
+        "content_fields": ["summary", "content"],
+        "tags_field": "topics"
+      },
+      "profile_updates": {
+        "category": "career-milestones",
+        "title_field": "title",
+        "content_field": "description"
+      }
+    }
+  }
+}

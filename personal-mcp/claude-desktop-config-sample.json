@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "personal-ai-assistant": {
+      "command": "node",
+      "args": ["/Users/santhoshkumarsampangiramasetty/personal-mcp/dist/index.js"],
+      "cwd": "/Users/santhoshkumarsampangiramasetty/personal-mcp",
+      "env": {}
+    }
+  }
+}
