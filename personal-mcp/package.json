@@ -31,6 +31,6 @@
   },
   "optionalDependencies": {
     "@octokit/rest": "^20.1.2",
-    "csv-parser": "^3.0.0"
+    "csv-parser": "^3.2.0"
   }
 }

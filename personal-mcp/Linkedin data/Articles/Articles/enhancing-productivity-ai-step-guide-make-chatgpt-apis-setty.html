@@ -1,0 +1,181 @@
+<html>
+<head>
+  <title>Enhancing Productivity with AI: Step by Step guide to Make ChatGPT APIs Analyse your Excel file</title>
+  <style>
+    body {
+      margin: 0 auto;
+      width: 744px;
+      font-family: Source Serif Pro, serif;
+      line-height: 32px;
+      font-weight: 400;
+      color: rgba(0, 0, 0, 0.7);
+      font-size: 21px;
+    }
+    h1, h2, h3 {
+      font-family: Source Sans Pro, Helvetica, Arial, sans-serif;
+    }
+    h1 a, h1 a:visited {
+      color: inherit;
+      text-decoration: none;
+    }
+    h1 {
+      line-height: 48px;
+      font-weight: 600;
+      color: rgba(0, 0, 0, 0.85);
+      font-size: 42px;
+      margin: 32px 0 20px;
+    }
+    h2 {
+      line-height: 32px;
+      font-weight: 600;
+      color: rgba(0, 0, 0, 0.85);
+      font-size: 26px;
+      margin: 28px 0;
+    }
+    h3 {
+      line-height: 28px;
+      font-weight: 600;
+      color: rgba(0, 0, 0, 0.85);
+      font-size: 21px;
+      margin: 24px 0;
+    }
+    p {
+      margin: 32px 0;
+    }
+    .created, .published {
+      color: rgba(0, 0, 0, 0.55);
+      font-size: 15px;
+      line-height: 15px;
+      margin: 20px 0;
+    }
+    .created + .published {
+      margin-top: -12px;
+    }
+    blockquote {
+      font-family: Georgia, Source Serif Pro, serif;
+      font-style: italic;
+      font-size: 24px;
+      line-height: 36px;
+      margin: 48px 120px;
+      text-align: center;
+    }
+    a {
+      word-wrap: break-word;
+      outline: none;
+      text-decoration: none;
+      background-color: transparent;
+      border: 0;
+      color: #008CC9;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    a:visited {
+      color: #8C68CB;
+    }
+    .center {
+      text-align: center;
+    }
+    iframe {
+      display: block;
+      margin: 44px auto;
+    }
+    *:not(pre) + pre, pre:first-of-type {
+      margin-top: 32px;
+      padding-top: 32px;
+    }
+    pre:only-of-type {
+      margin: 32px 0;
+      padding: 32px;
+    }
+    pre {
+      background: #F3F6F8;
+      overflow-x: auto;
+      display: block;
+      font-size: 13px;
+      font-family: monospace;
+      line-height: 13px;
+      padding: 0 32px 32px;
+      white-space: pre;
+    }
+    a.embedded {
+      background: #F3F6F8;
+      display: block;
+      padding: 32px;
+      margin: 32px 0;
+    }
+    img {
+      height: auto;
+      max-width: 100%;
+    }
+    .slate-image-embed__resize-full-width img {
+      width: 100%;
+    }
+    .series-logo {
+      width: 48px;
+      height: 48px;
+      box-sizing: border-box;
+      background-clip: content-box;
+      border: 4px solid transparent;
+      border-radius: 6px;
+      object-fit: scale-down;
+      float: left;
+    }
+    .series-title {
+      font-size: 16px;
+      font-weight: 600;
+      vertical-align: top;
+    }
+    .series-description {
+      color: rgba(0,0,0,.6);
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 20px;
+    }
+    div {
+      margin: 32px 0;
+    }
+  </style>
+</head>
+<body>
+    <img class="series-logo" src="https://media.licdn.com/dms/image/v2/D4E12AQEqrG3yf687xg/series-logo_image-shrink_300_300/series-logo_image-shrink_300_300/0/1687008164072?e=1755734400&v=beta&t=_bAF5fqYM3fmXm02gQGDI9XnhC1lR7PLw5ic4nJyLe8" />
+    <h3>
+      <span class="series-title">WorkWonders with AI</span>
+      </br>
+      <span class="series-description">Boost office productivity with 'WorkWonders with AI', exploring AI tools like ChatGPT and Bard solving real problems</span>
+    </h3>
+    <img src="https://media.licdn.com/mediaD4E12AQE3dbHW6lVukQ" alt="" title="" />
+      <h1><a href="https://www.linkedin.com/pulse/enhancing-productivity-ai-step-guide-make-chatgpt-apis-setty">Enhancing Productivity with AI: Step by Step guide to Make ChatGPT APIs Analyse your Excel file</a></h1>
+    <p class="created">Created on 2023-06-06 13:33</p>
+  <p class="published">Published on 2023-06-07 18:00</p>
+  <div><h3>Introduction</h3><p>In an era where data is abundant, harnessing its power can fuel smarter decision-making and productivity enhancement. This is where AI, particularly language models like ChatGPT, comes into play. Imagine being able to ask natural language questions about your data and receiving clear, intelligent responses. No complex SQL queries, no elaborate report generation—just you, your data, and AI.</p><p>In this article, I am not focussing on any ready made plugins or using ChatGPT to write Excel formulas. However, I am going to explain how to use Python and Open AI's APIs directly to upload CSVs and analyse data that require extensive research. </p><h3>Why Use ChatGPT to Analyse Excel or CSV Files?</h3><p>Simple tasks such as calculating column averages or looking up values don't necessitate the aid of ChatGPT. AI should be employed only when the manual effort required is substantial, and time is of the essence.The goal is to make data accessibility and understanding easier. Instead of manually combing through rows and columns or relying on hard-coded formulas, you can utilize AI to process your data intelligently. ChatGPT can provide insights, identify trends, and even generate reports. The marriage of AI and data analysis can take your productivity to the next level. To demonstrate this, I will analyze a publicly available Netflix dataset to assess the quality of its film content, showcasing the potential of combining AI and data analysis for insightful research.</p><h3>How To Use ChatGPT to Analyse Your CSV Files?</h3><p><strong>Step 1: Prepare Your Data</strong></p><p>Start by organizing your CSV file. Ensure the data is clean, without any incomplete or inaccurate entries. Give meaningful names to your columns, which will act as data labels for your AI assistant. In this example, I am using publicly available <a href="https://www.kaggle.com/datasets/senapatirajesh/netflix-tv-shows-and-movies?resource=download" target="_blank">Netflix dataset from Kaggle</a>. Download the data and save the file in .CSV format. Using this data, I am going to identify the <strong>distribution of good content vs mediocre content in Netflix</strong>. This dataset has some basic information such as Show type, title, director, cast, genre, description etc.</p><p><strong>Step 2: Install Python</strong></p><p>Python is favored for data analysis due to its simplicity, extensive data-centric libraries, and seamless integration with AI and machine learning tools. In our case, we mostly use python to connect to OpenAI's APIs. </p><p>Refer to this step by step guide to <a href="https://www.geeksforgeeks.org/how-to-install-jupyter-notebook-in-windows/" target="_blank">install python (and access it using Jupyter notebook) and get started</a>.</p><p><strong>Step 3: </strong>Importing Necessary Libraries</p><p>Install the necessary Python libraries. In a new instance of Jupyter notebook, run</p><pre spellcheck="false">import openai
+import pandas as pd
+</pre><p>Here, two Python libraries are imported.</p><ul><li><strong>openai</strong> is the official OpenAI library that provides the Python interface to the OpenAI API. It allows the program to interact with the GPT-3 model.</li><li><strong>pandas</strong> is a library offering data manipulation and analysis tools. It's used in this script to handle the CSV data.</li></ul><p><strong>Step 2: OpenAI API key Configuration</strong></p><pre spellcheck="false">openai.api_key = 'ENTER YOUR API KEY HERE
+</pre><p>This line sets the API key for OpenAI, which is necessary for making API calls to OpenAI’s servers.</p><p><strong>Step 3: Load the .csv file into Python</strong></p><p>Use the pandas library to read the .csv file.</p><pre spellcheck="false">file_path = r'C:\XXXX\YYYY\Documents\ZZZZ\netflix.csv'
+df = pd.read_csv(file_path)
+</pre><p>The script reads a CSV file from a given path using the <strong>pd.read_csv</strong> function, and stores the result in a pandas DataFrame.</p><p><strong>Step 4: Filtering the Data</strong></p><pre spellcheck="false">df_movies = df[df['type'] == 'Movie']
+</pre><p>Here, the code filters out movies from the DataFrame by checking where 'type' equals 'Movie'.</p><p><strong>Step 5: Initialize Lists for Movie Titles and Predicted Categories</strong></p><pre spellcheck="false">movie_titles = [
+predicted_categories = []]
+</pre><p>Two lists are initialized here. One is for storing movie titles and the other for storing the categories predicted by the OpenAI API.</p><p><strong>Step 6: Batching</strong></p><pre spellcheck="false">batch_size = 500
+num_batches = len(df_movies) // batch_size + 1
+</pre><p>The code uses batching to process the data and make predictions. This allows the script to handle larger datasets without exceeding the <strong>OpenAI API's rate limits or output length limits. Also calling OpenAI APIs multiple times can be quite expensive. </strong></p><p><strong>Step 7: Batch Processing and Predicting Categories</strong></p><p>The script enters a loop to process the data in batches. For each batch, it gets the titles of the movies, sets up a prompt for the GPT-3 model based on those titles, uses the OpenAI API to generate predicted categories, and extracts those categories from the API response. Feel free to use other models as in the API <a href="https://platform.openai.com/docs/api-reference/models" target="_blank">reference documentation. </a></p><p><strong>7.1 Setting up Start and End Indices</strong></p><pre spellcheck="false">start_idx = batch_num * batch_size
+end_idx = (batch_num + 1) * batch_size
+</pre><p>Here, the script sets up the start and end indices for each batch of data. This will determine which movies are included in each batch.</p><p><strong>7.2 Getting Batch Titles</strong></p><pre spellcheck="false">batch_titles = df_movies.iloc[start_idx:end_idx]['title'].tolist()
+movie_titles.extend(batch_titles)
+</pre><p>In this step, it selects the titles of the movies in the current batch, converts them to a list and then extends the 'movie_titles' list with these batch titles.</p><p><strong>7.3 Setting up the Prompt</strong></p><pre spellcheck="false">prompt = "\n".join([f"Classify the movie '{title}' into the categories: Very Good, Good, Average, Bad, or Very Bad based on its rating.
+                    for title in batch_titles])"
+</pre><p>This step sets up the prompt for the GPT-3 model. For each movie title in the batch, it generates a statement asking the model to classify the movie into one of the five categories.</p><p><strong>7.4 Using OpenAI API to Generate Predicted Categories</strong></p><pre spellcheck="false">response = openai.Completion.create(
+&nbsp; &nbsp; engine="text-davinci-003",
+&nbsp; &nbsp; prompt=prompt,
+&nbsp; &nbsp; max_tokens=len(batch_titles) * 5,
+&nbsp; &nbsp; temperature=0.3,
+&nbsp; &nbsp; n=len(batch_titles),
+&nbsp; &nbsp; stop=None,
+)
+</pre><p>This part is where the OpenAI GPT-3 model is actually called.</p><ul><li><strong>engine</strong> specifies the GPT-3 model variant to use. In this case, it's "text-davinci-003".</li><li><strong>prompt</strong> passes the generated prompt to the model.</li><li><strong>max_tokens</strong> is the maximum length of the output, set to five times the number of titles in the batch.</li><li><strong>temperature</strong> controls the randomness of the model's output. Lower values (like 0.3 here) make the output more deterministic, while higher values make it more random.</li><li><strong>n</strong> asks the model to generate a separate completion for each title in the batch.</li><li><strong>stop</strong> can be used to set stopping conditions for the model's text generation, but here it's not used.</li></ul><p><strong>7.5 Extracting Predicted Categories from the API Response</strong></p><pre spellcheck="false">predicted_batch_categories = [choice.text.strip() for choice in response.choices]
+predicted_categories.extend(predicted_batch_categories)
+</pre><p>This step extracts the predicted categories from the API response and then extends the 'predicted_categories' list with these batch categories.</p><p>So, that completes the step-by-step breakdown of this Python script using OpenAI GPT-3 for movie categorization. By applying machine learning to movie categorization, this script offers a novel approach to organizing and understanding movie data.</p><p><strong>Step 8: Adding Predicted Categories to DataFrame</strong></p><pre spellcheck="false">df_movies['predicted_category'] = predicted_categories[:len(df_movies)]
+</pre><p>After the loop finishes processing all batches, it adds the predicted categories to the original DataFrame.</p><p><strong>Step 9: Printing the Result</strong></p><pre spellcheck="false">print(df_movies[['title', 'predicted_category']])
+</pre><p>Finally, the script prints the DataFrame with movie titles and their predicted categories.</p><p>The resulting dataset would have the list of movie titles and their rating category based on their rating score, which is the result we want. The result looks as follows.</p><figure class="slate-resizable-image-embed slate-image-embed__resize-full-width"><img alt="No alt text provided for this image" data-media-urn="urn:li:digitalmediaAsset:D4E12AQGbGh3DV98fYg" src="https://media.licdn.com/dms/image/v2/D4E12AQGbGh3DV98fYg/article-inline_image-shrink_400_744/article-inline_image-shrink_400_744/0/1686157685720?e=1755734400&amp;v=beta&amp;t=VwO1K0qfP681vy1UueyaeUj4KJIcg2Ecz-1_UB0xM7k"></figure><p>When I exported the resulting dataset to do a simple analysis in excel it gave me the results as follows</p><figure class="slate-resizable-image-embed slate-image-embed__resize-full-width"><img alt="No alt text provided for this image" data-media-urn="urn:li:digitalmediaAsset:D4E12AQHzP8foiq_xzg" src="https://media.licdn.com/dms/image/v2/D4E12AQHzP8foiq_xzg/article-inline_image-shrink_400_744/article-inline_image-shrink_400_744/0/1686158328578?e=1755734400&amp;v=beta&amp;t=IMq6DCIDZabrDN1OtLB4B__BLgAJN5xk1EziLkKRDHo"></figure><p>The results indicate that a significant number of Netflix's movie offerings tend to exhibit a more moderate quality in terms of content.</p><p>This analysis sheds light on the immense power of OpenAI's models in driving data-driven research. Imagine the laborious task of manually obtaining rating data or making API calls to platforms like IMDb for every single movie. However, by leveraging OpenAI's cutting-edge language models, researchers can unlock a world of possibilities. With a well-defined prompt, a wealth of information can be effortlessly extracted, empowering researchers to derive insightful conclusions and explore endless avenues of combining AI with data analysis.</p><p>The fusion of AI and data analysis holds tremendous potential, revolutionizing the way we approach research and opening up new horizons for discovery.</p><p><br></p></div>
+</body>
+</html>

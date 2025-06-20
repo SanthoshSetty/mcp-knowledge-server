@@ -1,537 +1,491 @@
+"use strict";
 /**
  * Personal AI Assistant MCP Server - Cloudflare Workers Edition
- * 
+ *
  * A web-accessible MCP server that makes your personal knowledge base available via HTTP API.
  * Integrates with Cloudflare KV for data storage and R2 for file storage.
  */
-
-import { z } from 'zod';
-
-export interface Env {
-  KNOWLEDGE_BASE: any; // KVNamespace
-  FILES?: any; // R2Bucket
-}
-
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
 // Personal AI Assistant Worker
 class PersonalAIWorker {
-  private env: Env;
-  private categories = {
-    'professional-profile': 'Professional profile and summary',
-    'work-experience': 'Career history and professional experience',
-    'skills-expertise': 'Technical and professional skills',
-    'education-background': 'Educational background and qualifications',
-    'github-projects': 'Personal GitHub repositories and code projects',
-    'certifications': 'Professional certifications and achievements',
-    'recommendations': 'Professional recommendations and endorsements',
-    'linkedin-posts': 'Professional LinkedIn posts and articles', 
-    'learning-notes': 'Programming tutorials, courses, and technical learning',
-    'project-decisions': 'Architecture decisions and technical choices',
-    'career-milestones': 'Professional achievements and career progression',
-    'meeting-notes': 'Important meetings, discussions, and decisions',
-    'personal-research': 'Research papers, articles, and industry insights'
-  };
-
-  constructor(env: Env) {
-    this.env = env;
-  }
-
-  async handleRequest(request: Request): Promise<Response> {
-    const url = new URL(request.url);
-    const path = url.pathname;
-
-    // Handle CORS
-    if (request.method === 'OPTIONS') {
-      return new Response(null, {
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type',
-        },
-      });
+    constructor(env) {
+        this.categories = {
+            'professional-profile': 'Professional profile and summary',
+            'work-experience': 'Career history and professional experience',
+            'skills-expertise': 'Technical and professional skills',
+            'education-background': 'Educational background and qualifications',
+            'github-projects': 'Personal GitHub repositories and code projects',
+            'certifications': 'Professional certifications and achievements',
+            'recommendations': 'Professional recommendations and endorsements',
+            'linkedin-posts': 'Professional LinkedIn posts and articles',
+            'learning-notes': 'Programming tutorials, courses, and technical learning',
+            'project-decisions': 'Architecture decisions and technical choices',
+            'career-milestones': 'Professional achievements and career progression',
+            'meeting-notes': 'Important meetings, discussions, and decisions',
+            'personal-research': 'Research papers, articles, and industry insights'
+        };
+        this.env = env;
     }
-
-    // API Routes
-    if (path.startsWith('/api/')) {
-      return this.handleAPI(request);
-    }
-
-    // MCP Server Routes
-    if (path === '/mcp' || path === '/sse') {
-      return this.handleMCP(request);
-    }
-
-    // Default: Return API documentation
-    return this.handleDocs();
-  }
-
-  async handleAPI(request: Request): Promise<Response> {
-    const url = new URL(request.url);
-    const path = url.pathname;
-    const method = request.method;
-
-    try {
-      let result: any;
-
-      switch (path) {
-        case '/api/search':
-          if (method === 'GET') {
-            const query = url.searchParams.get('q') || '';
-            const category = url.searchParams.get('category') || '';
-            const limit = parseInt(url.searchParams.get('limit') || '10');
-            result = await this.searchKnowledge(query, category, limit);
-          }
-          break;
-
-        case '/api/github/projects':
-          if (method === 'GET') {
-            const language = url.searchParams.get('language') || '';
-            const topic = url.searchParams.get('topic') || '';
-            result = await this.getGitHubProjects(language, topic);
-          }
-          break;
-
-        case '/api/linkedin/activity':
-          if (method === 'GET') {
-            const type = url.searchParams.get('type') || 'all';
-            const timeframe = url.searchParams.get('timeframe') || 'all';
-            result = await this.getLinkedInActivity(type, timeframe);
-          }
-          break;
-
-        case '/api/timeline':
-          if (method === 'GET') {
-            const timeframe = url.searchParams.get('timeframe') || 'all';
-            const focus = url.searchParams.get('focus') || 'all';
-            result = await this.getPersonalTimeline(timeframe, focus);
-          }
-          break;
-
-        case '/api/knowledge':
-          if (method === 'POST') {
-            const body = await request.json();
-            result = await this.addKnowledge(body);
-          }
-          break;
-
-        case '/api/analytics/growth':
-          if (method === 'GET') {
-            const dimension = url.searchParams.get('dimension') || 'skills';
-            result = await this.analyzeGrowthPatterns(dimension);
-          }
-          break;
-
-        default:
-          return new Response('API endpoint not found', { status: 404 });
-      }
-
-      return new Response(JSON.stringify(result, null, 2), {
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
-      });
-
-    } catch (error) {
-      return new Response(JSON.stringify({
-        error: 'API Error',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      }), {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
-      });
-    }
-  }
-
-  async handleMCP(request: Request): Promise<Response> {
-    if (request.method === 'GET') {
-      // Server-Sent Events for MCP
-      return new Response('MCP Server running', {
-        headers: {
-          'Content-Type': 'text/event-stream',
-          'Cache-Control': 'no-cache',
-          'Connection': 'keep-alive',
-          'Access-Control-Allow-Origin': '*',
-        },
-      });
-    }
-
-    if (request.method === 'POST') {
-      // Handle MCP JSON-RPC requests
-      const body = await request.json();
-      const result = await this.handleMCPRequest(body);
-      
-      return new Response(JSON.stringify(result), {
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
-      });
-    }
-
-    return new Response('Method not allowed', { status: 405 });
-  }
-
-  async handleMCPRequest(request: any): Promise<any> {
-    const { method, params, id } = request;
-
-    try {
-      let result: any;
-
-      switch (method) {
-        case 'tools/list':
-          result = await this.listTools();
-          break;
-        case 'tools/call':
-          result = await this.callTool(params.name, params.arguments || {});
-          break;
-        default:
-          throw new Error(`Unknown method: ${method}`);
-      }
-
-      return {
-        jsonrpc: '2.0',
-        id,
-        result
-      };
-
-    } catch (error) {
-      return {
-        jsonrpc: '2.0',
-        id,
-        error: {
-          code: -32000,
-          message: error instanceof Error ? error.message : 'Unknown error'
-        }
-      };
-    }
-  }
-
-  async listTools(): Promise<any> {
-    return {
-      tools: [
-        {
-          name: 'search_personal_knowledge',
-          description: 'Search across all personal knowledge categories',
-          inputSchema: {
-            type: 'object',
-            properties: {
-              query: { type: 'string', description: 'Search query' },
-              category: { type: 'string', description: 'Optional category filter' },
-              limit: { type: 'number', description: 'Maximum results', default: 10 }
-            },
-            required: ['query']
-          }
-        },
-        {
-          name: 'get_github_projects',
-          description: 'Get information about GitHub repositories',
-          inputSchema: {
-            type: 'object',
-            properties: {
-              language: { type: 'string', description: 'Filter by language' },
-              topic: { type: 'string', description: 'Filter by topic' }
+    handleRequest(request) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const url = new URL(request.url);
+            const path = url.pathname;
+            // Handle CORS
+            if (request.method === 'OPTIONS') {
+                return new Response(null, {
+                    headers: {
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+                        'Access-Control-Allow-Headers': 'Content-Type',
+                    },
+                });
             }
-          }
-        },
-        {
-          name: 'get_linkedin_activity',
-          description: 'Retrieve LinkedIn posts and activity',
-          inputSchema: {
-            type: 'object',
-            properties: {
-              type: { type: 'string', enum: ['posts', 'articles', 'comments', 'all'] },
-              timeframe: { type: 'string', enum: ['week', 'month', 'quarter', 'year', 'all'] }
+            // API Routes
+            if (path.startsWith('/api/')) {
+                return this.handleAPI(request);
             }
-          }
-        },
-        {
-          name: 'add_personal_knowledge',
-          description: 'Add new knowledge to the knowledge base',
-          inputSchema: {
-            type: 'object',
-            properties: {
-              category: { type: 'string', enum: Object.keys(this.categories) },
-              title: { type: 'string' },
-              content: { type: 'string' },
-              tags: { type: 'array', items: { type: 'string' } },
-              metadata: { type: 'object' }
-            },
-            required: ['category', 'title', 'content']
-          }
-        },
-        {
-          name: 'get_personal_timeline',
-          description: 'Get chronological view of personal development',
-          inputSchema: {
-            type: 'object',
-            properties: {
-              timeframe: { type: 'string', enum: ['month', 'quarter', 'year', 'all'] },
-              focus: { type: 'string', enum: ['career', 'technical', 'learning', 'projects', 'all'] }
+            // MCP Server Routes
+            if (path === '/mcp' || path === '/sse') {
+                return this.handleMCP(request);
             }
-          }
-        },
-        {
-          name: 'analyze_growth_patterns',
-          description: 'Analyze professional and technical growth patterns',
-          inputSchema: {
-            type: 'object',
-            properties: {
-              dimension: { type: 'string', enum: ['skills', 'projects', 'network', 'content', 'achievements'] }
-            },
-            required: ['dimension']
-          }
-        }
-      ]
-    };
-  }
-
-  async callTool(name: string, args: any): Promise<any> {
-    switch (name) {
-      case 'search_personal_knowledge':
-        return {
-          content: [{
-            type: 'text',
-            text: JSON.stringify(await this.searchKnowledge(args.query, args.category, args.limit), null, 2)
-          }]
-        };
-      case 'get_github_projects':
-        return {
-          content: [{
-            type: 'text',
-            text: JSON.stringify(await this.getGitHubProjects(args.language, args.topic), null, 2)
-          }]
-        };
-      case 'get_linkedin_activity':
-        return {
-          content: [{
-            type: 'text',
-            text: JSON.stringify(await this.getLinkedInActivity(args.type, args.timeframe), null, 2)
-          }]
-        };
-      case 'add_personal_knowledge':
-        return {
-          content: [{
-            type: 'text',
-            text: JSON.stringify(await this.addKnowledge(args), null, 2)
-          }]
-        };
-      case 'get_personal_timeline':
-        return {
-          content: [{
-            type: 'text',
-            text: JSON.stringify(await this.getPersonalTimeline(args.timeframe, args.focus), null, 2)
-          }]
-        };
-      case 'analyze_growth_patterns':
-        return {
-          content: [{
-            type: 'text',
-            text: JSON.stringify(await this.analyzeGrowthPatterns(args.dimension), null, 2)
-          }]
-        };
-      default:
-        throw new Error(`Unknown tool: ${name}`);
-    }
-  }
-
-  // Knowledge Base Operations
-  async getKnowledgeBase(): Promise<Map<string, any[]>> {
-    const knowledgeBase = new Map();
-    
-    for (const category of Object.keys(this.categories)) {
-      const data = await this.env.KNOWLEDGE_BASE.get(category);
-      knowledgeBase.set(category, data ? JSON.parse(data) : []);
-    }
-    
-    return knowledgeBase;
-  }
-
-  async saveKnowledgeBase(knowledgeBase: Map<string, any[]>): Promise<void> {
-    for (const [category, data] of knowledgeBase.entries()) {
-      await this.env.KNOWLEDGE_BASE.put(category, JSON.stringify(data));
-    }
-  }
-
-  async searchKnowledge(query: string, category?: string, limit: number = 10): Promise<any> {
-    const knowledgeBase = await this.getKnowledgeBase();
-    const results: any[] = [];
-    
-    const searchCategories = category ? [category] : Object.keys(this.categories);
-    
-    for (const cat of searchCategories) {
-      const entries = knowledgeBase.get(cat) || [];
-      
-      for (const entry of entries) {
-        const searchText = `${entry.title || entry.name || ''} ${entry.content || entry.description || ''} ${(entry.tags || []).join(' ')}`.toLowerCase();
-        
-        if (searchText.includes(query.toLowerCase())) {
-          results.push({
-            ...entry,
-            category: cat,
-            relevanceScore: this.calculateRelevance(query, searchText)
-          });
-        }
-      }
-    }
-    
-    results.sort((a, b) => b.relevanceScore - a.relevanceScore);
-    
-    return {
-      query,
-      totalResults: results.length,
-      results: results.slice(0, limit)
-    };
-  }
-
-  calculateRelevance(query: string, text: string): number {
-    const queryWords = query.toLowerCase().split(' ');
-    let score = 0;
-    
-    for (const word of queryWords) {
-      const regex = new RegExp(`\\b${word}\\b`, 'gi');
-      const matches = text.match(regex);
-      if (matches) {
-        score += matches.length;
-      }
-    }
-    
-    return score;
-  }
-
-  async getGitHubProjects(language?: string, topic?: string): Promise<any> {
-    const knowledgeBase = await this.getKnowledgeBase();
-    const projects = knowledgeBase.get('github-projects') || [];
-    
-    let filteredProjects = projects;
-    
-    if (language) {
-      filteredProjects = filteredProjects.filter((p: any) => 
-        (p.language && p.language.toLowerCase() === language.toLowerCase()) ||
-        (p.metadata?.language && p.metadata.language.toLowerCase() === language.toLowerCase()) ||
-        (p.tags && p.tags.some((tag: string) => tag.toLowerCase() === language.toLowerCase()))
-      );
-    }
-    
-    if (topic) {
-      filteredProjects = filteredProjects.filter((p: any) => 
-        (p.topics && p.topics.some((t: string) => t.toLowerCase().includes(topic.toLowerCase()))) ||
-        (p.tags && p.tags.some((tag: string) => tag.toLowerCase().includes(topic.toLowerCase())))
-      );
-    }
-    
-    return {
-      totalProjects: filteredProjects.length,
-      projects: filteredProjects
-    };
-  }
-
-  async getLinkedInActivity(type: string, timeframe: string): Promise<any> {
-    const knowledgeBase = await this.getKnowledgeBase();
-    const activity = knowledgeBase.get('linkedin-posts') || [];
-    
-    let filteredActivity = activity;
-    
-    if (type !== 'all') {
-      filteredActivity = filteredActivity.filter((item: any) => item.type === type);
-    }
-    
-    // Add timeframe filtering logic here
-    
-    return {
-      totalActivity: filteredActivity.length,
-      activity: filteredActivity
-    };
-  }
-
-  async addKnowledge(entry: any): Promise<any> {
-    const knowledgeBase = await this.getKnowledgeBase();
-    const { category, title, content, tags = [], metadata = {} } = entry;
-    
-    const categoryEntries = knowledgeBase.get(category) || [];
-    
-    const newEntry = {
-      id: `${category}-${Date.now()}`,
-      title,
-      content,
-      tags,
-      metadata: {
-        ...metadata,
-        dateAdded: new Date().toISOString()
-      }
-    };
-    
-    categoryEntries.push(newEntry);
-    knowledgeBase.set(category, categoryEntries);
-    
-    await this.saveKnowledgeBase(knowledgeBase);
-    
-    return {
-      success: true,
-      entry: newEntry
-    };
-  }
-
-  async getPersonalTimeline(timeframe: string, focus: string): Promise<any> {
-    const knowledgeBase = await this.getKnowledgeBase();
-    const timeline: any[] = [];
-    
-    for (const [category, entries] of knowledgeBase.entries()) {
-      for (const entry of entries) {
-        timeline.push({
-          ...entry,
-          category,
-          date: entry.metadata?.dateAdded || entry.dateAdded || entry.date || entry.lastUpdated
+            // Default: Return API documentation
+            return this.handleDocs();
         });
-      }
     }
-    
-    timeline.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    
-    return {
-      timeframe,
-      focus,
-      totalEvents: timeline.length,
-      timeline
-    };
-  }
-
-  async analyzeGrowthPatterns(dimension: string): Promise<any> {
-    const knowledgeBase = await this.getKnowledgeBase();
-    
-    // Implement growth analysis logic based on dimension
-    const analysis = {
-      dimension,
-      insights: [],
-      trends: [],
-      recommendations: []
-    };
-    
-    switch (dimension) {
-      case 'skills':
-        // Analyze technical skills progression
-        break;
-      case 'projects':
-        // Analyze project complexity and growth
-        break;
-      case 'network':
-        // Analyze professional network growth
-        break;
-      case 'content':
-        // Analyze content creation patterns
-        break;
-      case 'achievements':
-        // Analyze career achievements
-        break;
+    handleAPI(request) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const url = new URL(request.url);
+            const path = url.pathname;
+            const method = request.method;
+            try {
+                let result;
+                switch (path) {
+                    case '/api/search':
+                        if (method === 'GET') {
+                            const query = url.searchParams.get('q') || '';
+                            const category = url.searchParams.get('category') || '';
+                            const limit = parseInt(url.searchParams.get('limit') || '10');
+                            result = yield this.searchKnowledge(query, category, limit);
+                        }
+                        break;
+                    case '/api/github/projects':
+                        if (method === 'GET') {
+                            const language = url.searchParams.get('language') || '';
+                            const topic = url.searchParams.get('topic') || '';
+                            result = yield this.getGitHubProjects(language, topic);
+                        }
+                        break;
+                    case '/api/linkedin/activity':
+                        if (method === 'GET') {
+                            const type = url.searchParams.get('type') || 'all';
+                            const timeframe = url.searchParams.get('timeframe') || 'all';
+                            result = yield this.getLinkedInActivity(type, timeframe);
+                        }
+                        break;
+                    case '/api/timeline':
+                        if (method === 'GET') {
+                            const timeframe = url.searchParams.get('timeframe') || 'all';
+                            const focus = url.searchParams.get('focus') || 'all';
+                            result = yield this.getPersonalTimeline(timeframe, focus);
+                        }
+                        break;
+                    case '/api/knowledge':
+                        if (method === 'POST') {
+                            const body = yield request.json();
+                            result = yield this.addKnowledge(body);
+                        }
+                        break;
+                    case '/api/analytics/growth':
+                        if (method === 'GET') {
+                            const dimension = url.searchParams.get('dimension') || 'skills';
+                            result = yield this.analyzeGrowthPatterns(dimension);
+                        }
+                        break;
+                    default:
+                        return new Response('API endpoint not found', { status: 404 });
+                }
+                return new Response(JSON.stringify(result, null, 2), {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*',
+                    },
+                });
+            }
+            catch (error) {
+                return new Response(JSON.stringify({
+                    error: 'API Error',
+                    message: error instanceof Error ? error.message : 'Unknown error'
+                }), {
+                    status: 500,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*',
+                    },
+                });
+            }
+        });
     }
-    
-    return analysis;
-  }
-
-  handleDocs(): Response {
-    const html = `
+    handleMCP(request) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (request.method === 'GET') {
+                // Server-Sent Events for MCP
+                return new Response('MCP Server running', {
+                    headers: {
+                        'Content-Type': 'text/event-stream',
+                        'Cache-Control': 'no-cache',
+                        'Connection': 'keep-alive',
+                        'Access-Control-Allow-Origin': '*',
+                    },
+                });
+            }
+            if (request.method === 'POST') {
+                // Handle MCP JSON-RPC requests
+                const body = yield request.json();
+                const result = yield this.handleMCPRequest(body);
+                return new Response(JSON.stringify(result), {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*',
+                    },
+                });
+            }
+            return new Response('Method not allowed', { status: 405 });
+        });
+    }
+    handleMCPRequest(request) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { method, params, id } = request;
+            try {
+                let result;
+                switch (method) {
+                    case 'tools/list':
+                        result = yield this.listTools();
+                        break;
+                    case 'tools/call':
+                        result = yield this.callTool(params.name, params.arguments || {});
+                        break;
+                    default:
+                        throw new Error(`Unknown method: ${method}`);
+                }
+                return {
+                    jsonrpc: '2.0',
+                    id,
+                    result
+                };
+            }
+            catch (error) {
+                return {
+                    jsonrpc: '2.0',
+                    id,
+                    error: {
+                        code: -32000,
+                        message: error instanceof Error ? error.message : 'Unknown error'
+                    }
+                };
+            }
+        });
+    }
+    listTools() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return {
+                tools: [
+                    {
+                        name: 'search_personal_knowledge',
+                        description: 'Search across all personal knowledge categories',
+                        inputSchema: {
+                            type: 'object',
+                            properties: {
+                                query: { type: 'string', description: 'Search query' },
+                                category: { type: 'string', description: 'Optional category filter' },
+                                limit: { type: 'number', description: 'Maximum results', default: 10 }
+                            },
+                            required: ['query']
+                        }
+                    },
+                    {
+                        name: 'get_github_projects',
+                        description: 'Get information about GitHub repositories',
+                        inputSchema: {
+                            type: 'object',
+                            properties: {
+                                language: { type: 'string', description: 'Filter by language' },
+                                topic: { type: 'string', description: 'Filter by topic' }
+                            }
+                        }
+                    },
+                    {
+                        name: 'get_linkedin_activity',
+                        description: 'Retrieve LinkedIn posts and activity',
+                        inputSchema: {
+                            type: 'object',
+                            properties: {
+                                type: { type: 'string', enum: ['posts', 'articles', 'comments', 'all'] },
+                                timeframe: { type: 'string', enum: ['week', 'month', 'quarter', 'year', 'all'] }
+                            }
+                        }
+                    },
+                    {
+                        name: 'add_personal_knowledge',
+                        description: 'Add new knowledge to the knowledge base',
+                        inputSchema: {
+                            type: 'object',
+                            properties: {
+                                category: { type: 'string', enum: Object.keys(this.categories) },
+                                title: { type: 'string' },
+                                content: { type: 'string' },
+                                tags: { type: 'array', items: { type: 'string' } },
+                                metadata: { type: 'object' }
+                            },
+                            required: ['category', 'title', 'content']
+                        }
+                    },
+                    {
+                        name: 'get_personal_timeline',
+                        description: 'Get chronological view of personal development',
+                        inputSchema: {
+                            type: 'object',
+                            properties: {
+                                timeframe: { type: 'string', enum: ['month', 'quarter', 'year', 'all'] },
+                                focus: { type: 'string', enum: ['career', 'technical', 'learning', 'projects', 'all'] }
+                            }
+                        }
+                    },
+                    {
+                        name: 'analyze_growth_patterns',
+                        description: 'Analyze professional and technical growth patterns',
+                        inputSchema: {
+                            type: 'object',
+                            properties: {
+                                dimension: { type: 'string', enum: ['skills', 'projects', 'network', 'content', 'achievements'] }
+                            },
+                            required: ['dimension']
+                        }
+                    }
+                ]
+            };
+        });
+    }
+    callTool(name, args) {
+        return __awaiter(this, void 0, void 0, function* () {
+            switch (name) {
+                case 'search_personal_knowledge':
+                    return {
+                        content: [{
+                                type: 'text',
+                                text: JSON.stringify(yield this.searchKnowledge(args.query, args.category, args.limit), null, 2)
+                            }]
+                    };
+                case 'get_github_projects':
+                    return {
+                        content: [{
+                                type: 'text',
+                                text: JSON.stringify(yield this.getGitHubProjects(args.language, args.topic), null, 2)
+                            }]
+                    };
+                case 'get_linkedin_activity':
+                    return {
+                        content: [{
+                                type: 'text',
+                                text: JSON.stringify(yield this.getLinkedInActivity(args.type, args.timeframe), null, 2)
+                            }]
+                    };
+                case 'add_personal_knowledge':
+                    return {
+                        content: [{
+                                type: 'text',
+                                text: JSON.stringify(yield this.addKnowledge(args), null, 2)
+                            }]
+                    };
+                case 'get_personal_timeline':
+                    return {
+                        content: [{
+                                type: 'text',
+                                text: JSON.stringify(yield this.getPersonalTimeline(args.timeframe, args.focus), null, 2)
+                            }]
+                    };
+                case 'analyze_growth_patterns':
+                    return {
+                        content: [{
+                                type: 'text',
+                                text: JSON.stringify(yield this.analyzeGrowthPatterns(args.dimension), null, 2)
+                            }]
+                    };
+                default:
+                    throw new Error(`Unknown tool: ${name}`);
+            }
+        });
+    }
+    // Knowledge Base Operations
+    getKnowledgeBase() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const knowledgeBase = new Map();
+            for (const category of Object.keys(this.categories)) {
+                const data = yield this.env.KNOWLEDGE_BASE.get(category);
+                knowledgeBase.set(category, data ? JSON.parse(data) : []);
+            }
+            return knowledgeBase;
+        });
+    }
+    saveKnowledgeBase(knowledgeBase) {
+        return __awaiter(this, void 0, void 0, function* () {
+            for (const [category, data] of knowledgeBase.entries()) {
+                yield this.env.KNOWLEDGE_BASE.put(category, JSON.stringify(data));
+            }
+        });
+    }
+    searchKnowledge(query_1, category_1) {
+        return __awaiter(this, arguments, void 0, function* (query, category, limit = 10) {
+            const knowledgeBase = yield this.getKnowledgeBase();
+            const results = [];
+            const searchCategories = category ? [category] : Object.keys(this.categories);
+            for (const cat of searchCategories) {
+                const entries = knowledgeBase.get(cat) || [];
+                for (const entry of entries) {
+                    const searchText = `${entry.title || entry.name || ''} ${entry.content || entry.description || ''} ${(entry.tags || []).join(' ')}`.toLowerCase();
+                    if (searchText.includes(query.toLowerCase())) {
+                        results.push(Object.assign(Object.assign({}, entry), { category: cat, relevanceScore: this.calculateRelevance(query, searchText) }));
+                    }
+                }
+            }
+            results.sort((a, b) => b.relevanceScore - a.relevanceScore);
+            return {
+                query,
+                totalResults: results.length,
+                results: results.slice(0, limit)
+            };
+        });
+    }
+    calculateRelevance(query, text) {
+        const queryWords = query.toLowerCase().split(' ');
+        let score = 0;
+        for (const word of queryWords) {
+            const regex = new RegExp(`\\b${word}\\b`, 'gi');
+            const matches = text.match(regex);
+            if (matches) {
+                score += matches.length;
+            }
+        }
+        return score;
+    }
+    getGitHubProjects(language, topic) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const knowledgeBase = yield this.getKnowledgeBase();
+            const projects = knowledgeBase.get('github-projects') || [];
+            let filteredProjects = projects;
+            if (language) {
+                filteredProjects = filteredProjects.filter((p) => {
+                    var _a;
+                    return (p.language && p.language.toLowerCase() === language.toLowerCase()) ||
+                        (((_a = p.metadata) === null || _a === void 0 ? void 0 : _a.language) && p.metadata.language.toLowerCase() === language.toLowerCase()) ||
+                        (p.tags && p.tags.some((tag) => tag.toLowerCase() === language.toLowerCase()));
+                });
+            }
+            if (topic) {
+                filteredProjects = filteredProjects.filter((p) => (p.topics && p.topics.some((t) => t.toLowerCase().includes(topic.toLowerCase()))) ||
+                    (p.tags && p.tags.some((tag) => tag.toLowerCase().includes(topic.toLowerCase()))));
+            }
+            return {
+                totalProjects: filteredProjects.length,
+                projects: filteredProjects
+            };
+        });
+    }
+    getLinkedInActivity(type, timeframe) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const knowledgeBase = yield this.getKnowledgeBase();
+            const activity = knowledgeBase.get('linkedin-posts') || [];
+            let filteredActivity = activity;
+            if (type !== 'all') {
+                filteredActivity = filteredActivity.filter((item) => item.type === type);
+            }
+            // Add timeframe filtering logic here
+            return {
+                totalActivity: filteredActivity.length,
+                activity: filteredActivity
+            };
+        });
+    }
+    addKnowledge(entry) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const knowledgeBase = yield this.getKnowledgeBase();
+            const { category, title, content, tags = [], metadata = {} } = entry;
+            const categoryEntries = knowledgeBase.get(category) || [];
+            const newEntry = {
+                id: `${category}-${Date.now()}`,
+                title,
+                content,
+                tags,
+                metadata: Object.assign(Object.assign({}, metadata), { dateAdded: new Date().toISOString() })
+            };
+            categoryEntries.push(newEntry);
+            knowledgeBase.set(category, categoryEntries);
+            yield this.saveKnowledgeBase(knowledgeBase);
+            return {
+                success: true,
+                entry: newEntry
+            };
+        });
+    }
+    getPersonalTimeline(timeframe, focus) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a;
+            const knowledgeBase = yield this.getKnowledgeBase();
+            const timeline = [];
+            for (const [category, entries] of knowledgeBase.entries()) {
+                for (const entry of entries) {
+                    timeline.push(Object.assign(Object.assign({}, entry), { category, date: ((_a = entry.metadata) === null || _a === void 0 ? void 0 : _a.dateAdded) || entry.dateAdded || entry.date || entry.lastUpdated }));
+                }
+            }
+            timeline.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+            return {
+                timeframe,
+                focus,
+                totalEvents: timeline.length,
+                timeline
+            };
+        });
+    }
+    analyzeGrowthPatterns(dimension) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const knowledgeBase = yield this.getKnowledgeBase();
+            // Implement growth analysis logic based on dimension
+            const analysis = {
+                dimension,
+                insights: [],
+                trends: [],
+                recommendations: []
+            };
+            switch (dimension) {
+                case 'skills':
+                    // Analyze technical skills progression
+                    break;
+                case 'projects':
+                    // Analyze project complexity and growth
+                    break;
+                case 'network':
+                    // Analyze professional network growth
+                    break;
+                case 'content':
+                    // Analyze content creation patterns
+                    break;
+                case 'achievements':
+                    // Analyze career achievements
+                    break;
+            }
+            return analysis;
+        });
+    }
+    handleDocs() {
+        const html = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1004,20 +958,20 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 </body>
 </html>`;
-
-    return new Response(html, {
-      headers: {
-        'Content-Type': 'text/html; charset=UTF-8',
-        'Access-Control-Allow-Origin': '*',
-      },
-    });
-  }
+        return new Response(html, {
+            headers: {
+                'Content-Type': 'text/html; charset=UTF-8',
+                'Access-Control-Allow-Origin': '*',
+            },
+        });
+    }
 }
-
 // Cloudflare Workers entry point
-export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
-    const worker = new PersonalAIWorker(env);
-    return worker.handleRequest(request);
-  },
+exports.default = {
+    fetch(request, env) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const worker = new PersonalAIWorker(env);
+            return worker.handleRequest(request);
+        });
+    },
 };

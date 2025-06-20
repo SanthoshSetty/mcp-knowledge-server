@@ -23,9 +23,16 @@ import { z } from 'zod';
 class PersonalAIServer {
   private server: Server;
   private knowledgeBase: Map<string, any> = new Map();
-  private dataFile: string = path.join(process.cwd(), 'data', 'knowledge-base.json');
+  private dataFile: string = path.join(process.cwd(), 'data', 'processed-knowledge-base.json');
+  private fallbackDataFile: string = path.join(process.cwd(), 'data', 'knowledge-base.json');
   private categories = {
+    'professional-profile': 'Professional profile and summary',
+    'work-experience': 'Career history and professional experience',
+    'skills-expertise': 'Technical and professional skills',
+    'education-background': 'Educational background and qualifications',
     'github-projects': 'Personal GitHub repositories and code projects',
+    'certifications': 'Professional certifications and achievements',
+    'recommendations': 'Professional recommendations and endorsements',
     'linkedin-posts': 'Professional LinkedIn posts and articles', 
     'learning-notes': 'Programming tutorials, courses, and technical learning',
     'project-decisions': 'Architecture decisions and technical choices',
@@ -199,6 +206,64 @@ class PersonalAIServer {
               }
             }
           }
+        },
+        {
+          name: 'get_professional_profile',
+          description: 'Get comprehensive professional profile and summary',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              section: {
+                type: 'string',
+                description: 'Specific section to retrieve',
+                enum: ['summary', 'headline', 'industry', 'all']
+              }
+            }
+          }
+        },
+        {
+          name: 'get_work_experience',
+          description: 'Get detailed work experience and career history',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              company: {
+                type: 'string',
+                description: 'Filter by specific company'
+              },
+              role: {
+                type: 'string',
+                description: 'Filter by role or title keywords'
+              },
+              timeframe: {
+                type: 'string',
+                description: 'Time period to focus on',
+                enum: ['current', 'recent', 'all']
+              }
+            }
+          }
+        },
+        {
+          name: 'get_skills_expertise',
+          description: 'Get skills, competencies, and areas of expertise',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              category: {
+                type: 'string',
+                description: 'Filter by skill category',
+                enum: ['technical', 'management', 'analytical', 'all']
+              }
+            }
+          }
+        },
+        {
+          name: 'get_education_background',
+          description: 'Get educational background and qualifications',
+          inputSchema: {
+            type: 'object',
+            properties: {}
+          }
         }
       ]
     }));
@@ -222,6 +287,14 @@ class PersonalAIServer {
             return await this.analyzeGrowthPatterns(args);
           case 'export_github_data':
             return await this.exportGitHubData(args);
+          case 'get_professional_profile':
+            return await this.getProfessionalProfile(args);
+          case 'get_work_experience':
+            return await this.getWorkExperience(args);
+          case 'get_skills_expertise':
+            return await this.getSkillsExpertise(args);
+          case 'get_education_background':
+            return await this.getEducationBackground(args);
           default:
             throw new Error(`Unknown tool: ${name}`);
         }
@@ -250,11 +323,27 @@ class PersonalAIServer {
         fs.mkdirSync(dataDir, { recursive: true });
       }
 
-      // Load existing knowledge base if it exists
+      // Try to load processed knowledge base first
       if (fs.existsSync(this.dataFile)) {
         const data = JSON.parse(fs.readFileSync(this.dataFile, 'utf-8'));
         this.knowledgeBase = new Map(Object.entries(data));
-        console.error(`📚 Loaded ${this.knowledgeBase.size} knowledge categories from ${this.dataFile}`);
+        console.error(`📚 Loaded ${this.knowledgeBase.size} knowledge categories from processed data`);
+        
+        // Display summary of loaded data
+        let totalEntries = 0;
+        for (const [category, entries] of this.knowledgeBase.entries()) {
+          if (Array.isArray(entries)) {
+            totalEntries += entries.length;
+            console.error(`   - ${category}: ${entries.length} entries`);
+          }
+        }
+        console.error(`📊 Total entries loaded: ${totalEntries}`);
+        
+      } else if (fs.existsSync(this.fallbackDataFile)) {
+        // Fallback to original knowledge base
+        const data = JSON.parse(fs.readFileSync(this.fallbackDataFile, 'utf-8'));
+        this.knowledgeBase = new Map(Object.entries(data));
+        console.error(`📚 Loaded ${this.knowledgeBase.size} knowledge categories from fallback data`);
       } else {
         // Initialize with default sample data
         this.initializeSampleData();
@@ -512,6 +601,210 @@ class PersonalAIServer {
             'Export repositories, READMEs, and commit history',
             'Structure data for AI accessibility'
           ]
+        }, null, 2)
+      }]
+    };
+  }
+
+  private async getProfessionalProfile(args: any) {
+    const { section = 'all' } = args;
+    const profileData = this.knowledgeBase.get('professional-profile') || [];
+    
+    if (profileData.length === 0) {
+      return {
+        content: [{
+          type: 'text',
+          text: 'No professional profile data available. Please run the data processing script first.'
+        }]
+      };
+    }
+
+    const profile = profileData[0]; // Assuming first entry is the main profile
+    
+    let content = '';
+    switch (section) {
+      case 'summary':
+        content = profile.summary || 'No summary available';
+        break;
+      case 'headline':
+        content = profile.headline || 'No headline available';
+        break;
+      case 'industry':
+        content = profile.industry || 'No industry information available';
+        break;
+      case 'all':
+      default:
+        content = JSON.stringify({
+          headline: profile.headline,
+          summary: profile.summary,
+          industry: profile.industry,
+          location: profile.location,
+          tags: profile.tags,
+          lastUpdated: profile.metadata?.dateProcessed
+        }, null, 2);
+        break;
+    }
+
+    return {
+      content: [{
+        type: 'text',
+        text: content
+      }]
+    };
+  }
+
+  private async getWorkExperience(args: any) {
+    const { company, role, timeframe = 'all' } = args;
+    const experienceData = this.knowledgeBase.get('work-experience') || [];
+    
+    if (experienceData.length === 0) {
+      return {
+        content: [{
+          type: 'text',
+          text: 'No work experience data available. Please run the data processing script first.'
+        }]
+      };
+    }
+
+    let filteredExperience = experienceData;
+
+    // Apply filters
+    if (company) {
+      filteredExperience = filteredExperience.filter((exp: any) => 
+        exp.company?.toLowerCase().includes(company.toLowerCase())
+      );
+    }
+
+    if (role) {
+      filteredExperience = filteredExperience.filter((exp: any) => 
+        exp.position?.toLowerCase().includes(role.toLowerCase()) ||
+        exp.title?.toLowerCase().includes(role.toLowerCase())
+      );
+    }
+
+    if (timeframe === 'current') {
+      filteredExperience = filteredExperience.filter((exp: any) => 
+        exp.endDate === 'Present' || exp.endDate === ''
+      );
+    } else if (timeframe === 'recent') {
+      // Filter for last 5 years
+      const fiveYearsAgo = new Date();
+      fiveYearsAgo.setFullYear(fiveYearsAgo.getFullYear() - 5);
+      filteredExperience = filteredExperience.filter((exp: any) => {
+        const startDate = new Date(exp.startDate);
+        return startDate >= fiveYearsAgo;
+      });
+    }
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify({
+          totalExperience: filteredExperience.length,
+          experiences: filteredExperience.map((exp: any) => ({
+            company: exp.company,
+            position: exp.position,
+            duration: `${exp.startDate} - ${exp.endDate}`,
+            location: exp.location,
+            description: exp.description?.substring(0, 500) + (exp.description?.length > 500 ? '...' : ''),
+            skills: exp.tags?.filter((tag: string) => !['work-experience', 'career'].includes(tag))
+          }))
+        }, null, 2)
+      }]
+    };
+  }
+
+  private async getSkillsExpertise(args: any) {
+    const { category = 'all' } = args;
+    const skillsData = this.knowledgeBase.get('skills-expertise') || [];
+    
+    if (skillsData.length === 0) {
+      return {
+        content: [{
+          type: 'text',
+          text: 'No skills data available. Please run the data processing script first.'
+        }]
+      };
+    }
+
+    const skillsEntry = skillsData[0]; // Assuming main skills entry
+    const allSkills = skillsEntry.skills || [];
+    
+    // Categorize skills (basic categorization)
+    const categorizedSkills = {
+      technical: allSkills.filter((skill: string) => 
+        ['Python', 'R', 'Machine Learning', 'AI', 'TypeScript', 'JavaScript', 'SQL', 'Data Analysis'].some(tech => 
+          skill.toLowerCase().includes(tech.toLowerCase())
+        )
+      ),
+      management: allSkills.filter((skill: string) => 
+        ['Product Management', 'Project Management', 'Leadership', 'Strategy'].some(mgmt => 
+          skill.toLowerCase().includes(mgmt.toLowerCase())
+        )
+      ),
+      analytical: allSkills.filter((skill: string) => 
+        ['Analysis', 'Analytics', 'Data', 'Research'].some(analytical => 
+          skill.toLowerCase().includes(analytical.toLowerCase())
+        )
+      )
+    };
+
+    let response = {};
+    switch (category) {
+      case 'technical':
+        response = { technicalSkills: categorizedSkills.technical };
+        break;
+      case 'management':
+        response = { managementSkills: categorizedSkills.management };
+        break;
+      case 'analytical':
+        response = { analyticalSkills: categorizedSkills.analytical };
+        break;
+      case 'all':
+      default:
+        response = {
+          totalSkills: allSkills.length,
+          categorizedSkills,
+          allSkills: allSkills,
+          topSkills: allSkills.slice(0, 10)
+        };
+        break;
+    }
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(response, null, 2)
+      }]
+    };
+  }
+
+  private async getEducationBackground(args: any) {
+    const educationData = this.knowledgeBase.get('education-background') || [];
+    
+    if (educationData.length === 0) {
+      return {
+        content: [{
+          type: 'text',
+          text: 'No education data available. Please run the data processing script first.'
+        }]
+      };
+    }
+
+    const formattedEducation = educationData.map((edu: any) => ({
+      institution: edu.school,
+      degree: edu.degree,
+      fieldOfStudy: edu.fieldOfStudy,
+      period: `${edu.startDate} - ${edu.endDate}`,
+      summary: edu.content
+    }));
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify({
+          totalEducation: educationData.length,
+          education: formattedEducation
         }, null, 2)
       }]
     };

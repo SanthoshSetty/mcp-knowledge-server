@@ -1,0 +1,153 @@
+<html>
+<head>
+  <title>How to defend against Prompt Injection Attacks in AI-based Applications?</title>
+  <style>
+    body {
+      margin: 0 auto;
+      width: 744px;
+      font-family: Source Serif Pro, serif;
+      line-height: 32px;
+      font-weight: 400;
+      color: rgba(0, 0, 0, 0.7);
+      font-size: 21px;
+    }
+    h1, h2, h3 {
+      font-family: Source Sans Pro, Helvetica, Arial, sans-serif;
+    }
+    h1 a, h1 a:visited {
+      color: inherit;
+      text-decoration: none;
+    }
+    h1 {
+      line-height: 48px;
+      font-weight: 600;
+      color: rgba(0, 0, 0, 0.85);
+      font-size: 42px;
+      margin: 32px 0 20px;
+    }
+    h2 {
+      line-height: 32px;
+      font-weight: 600;
+      color: rgba(0, 0, 0, 0.85);
+      font-size: 26px;
+      margin: 28px 0;
+    }
+    h3 {
+      line-height: 28px;
+      font-weight: 600;
+      color: rgba(0, 0, 0, 0.85);
+      font-size: 21px;
+      margin: 24px 0;
+    }
+    p {
+      margin: 32px 0;
+    }
+    .created, .published {
+      color: rgba(0, 0, 0, 0.55);
+      font-size: 15px;
+      line-height: 15px;
+      margin: 20px 0;
+    }
+    .created + .published {
+      margin-top: -12px;
+    }
+    blockquote {
+      font-family: Georgia, Source Serif Pro, serif;
+      font-style: italic;
+      font-size: 24px;
+      line-height: 36px;
+      margin: 48px 120px;
+      text-align: center;
+    }
+    a {
+      word-wrap: break-word;
+      outline: none;
+      text-decoration: none;
+      background-color: transparent;
+      border: 0;
+      color: #008CC9;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    a:visited {
+      color: #8C68CB;
+    }
+    .center {
+      text-align: center;
+    }
+    iframe {
+      display: block;
+      margin: 44px auto;
+    }
+    *:not(pre) + pre, pre:first-of-type {
+      margin-top: 32px;
+      padding-top: 32px;
+    }
+    pre:only-of-type {
+      margin: 32px 0;
+      padding: 32px;
+    }
+    pre {
+      background: #F3F6F8;
+      overflow-x: auto;
+      display: block;
+      font-size: 13px;
+      font-family: monospace;
+      line-height: 13px;
+      padding: 0 32px 32px;
+      white-space: pre;
+    }
+    a.embedded {
+      background: #F3F6F8;
+      display: block;
+      padding: 32px;
+      margin: 32px 0;
+    }
+    img {
+      height: auto;
+      max-width: 100%;
+    }
+    .slate-image-embed__resize-full-width img {
+      width: 100%;
+    }
+    .series-logo {
+      width: 48px;
+      height: 48px;
+      box-sizing: border-box;
+      background-clip: content-box;
+      border: 4px solid transparent;
+      border-radius: 6px;
+      object-fit: scale-down;
+      float: left;
+    }
+    .series-title {
+      font-size: 16px;
+      font-weight: 600;
+      vertical-align: top;
+    }
+    .series-description {
+      color: rgba(0,0,0,.6);
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 20px;
+    }
+    div {
+      margin: 32px 0;
+    }
+  </style>
+</head>
+<body>
+    <img class="series-logo" src="https://media.licdn.com/dms/image/v2/D4E12AQEqrG3yf687xg/series-logo_image-shrink_300_300/series-logo_image-shrink_300_300/0/1687008164072?e=1755734400&v=beta&t=_bAF5fqYM3fmXm02gQGDI9XnhC1lR7PLw5ic4nJyLe8" />
+    <h3>
+      <span class="series-title">WorkWonders with AI</span>
+      </br>
+      <span class="series-description">Boost office productivity with 'WorkWonders with AI', exploring AI tools like ChatGPT and Bard solving real problems</span>
+    </h3>
+    <img src="https://media.licdn.com/mediaD4E12AQGb5AMZ_uPYXw" alt="" title="" />
+      <h1><a href="https://www.linkedin.com/pulse/how-defend-against-prompt-injection-attacks-ai-based-setty-fgt1e">How to defend against Prompt Injection Attacks in AI-based Applications?</a></h1>
+    <p class="created">Created on 2023-12-22 12:41</p>
+  <p class="published">Published on 2023-12-22 13:45</p>
+  <div><p></p><p>If you're an application developer or product manager who has integrated ChatGPT into your services, this article is tailored for you. It addresses the issue of prompt injection attacks in AI chatbots - a situation where AI gives unusual or inappropriate responses. </p><p>This problem often arises in applications primarily built on direct API calls to OpenAI, lacking in-depth backend processing. This makes them susceptible to prompt attacks and reliant on users providing accurate and intended prompts. </p><p>The article aims to provide insight into this challenge, using examples from simple applications affected by such attacks.</p><h3>Case 1: ChatPDF&nbsp;</h3><p>ChatPDF is an AI-powered tool that allows users to interact with PDFs to extract information, pose questions, and obtain summaries. Users can upload PDFs and inquire about the content within. It is powered by OpenAI’s APIs.</p><p>In the intended use case, for example, a user has a 100-page PDF, such as a legal contract, and they can use ChatPDF to answer any question about the document. Additionally, it's designed to provide information on details not in the PDF but related to it, made possible through its connection to OpenAI.</p><p>However, the application acts more like a general-purpose question-answer tool like ChatGPT rather than sticking to its specific use case. For instance, I uploaded the Terms and Conditions document of Facebook into ChatPDF and asked an irrelevant question, “Which came first, the chicken or the egg?”. As the Product Manager of the application, I would expect a generic response like, “The uploaded PDF has no information about your question.” Instead, ChatPDF provided a lengthy response, as shown in the screenshot below. The response is correct, but completely unrelated to the purpose of the application. </p><p></p><figure><img data-media-urn="urn:li:digitalmediaAsset:D4E12AQH5vs9MT-MILg" src="https://media.licdn.com/dms/image/v2/D4E12AQH5vs9MT-MILg/article-inline_image-shrink_1500_2232/article-inline_image-shrink_1500_2232/0/1703249428429?e=1755734400&amp;v=beta&amp;t=xjabEJnyYU9UbLQPJsDF66oY8h2u7b5O9L9_zmDYmNU"><figcaption></figcaption></figure><p>This instance is a classic example of a prompt attack, where the user's input is deliberately crafted to sidestep the intended purpose of the application.</p><h3>Case 2: MedicalPDF&nbsp;</h3><p>Another instance involves an application named MedicalGPT, which is designed to address medical-related queries. However, it often functions like ChatGPT, answering a broad range of questions. For instance, I asked, “Give me one idea to become rich,” expecting a standard reply like, “This service is intended for Medical related questions only.” Surprisingly, it advised investing in the stock market, deviating from its medical focus. The response is displayed below.</p><figure><img data-media-urn="urn:li:digitalmediaAsset:D4E12AQEOTE1zMTz0eg" src="https://media.licdn.com/dms/image/v2/D4E12AQEOTE1zMTz0eg/article-inline_image-shrink_1000_1488/article-inline_image-shrink_1000_1488/0/1703250021132?e=1755734400&amp;v=beta&amp;t=vmXDkFS9w8TKEFMfBFimlfhAK-p3RVeMGWVARlQgzbU"><figcaption></figcaption></figure><p>This issue arises because these applications have a singular layer of integration with OpenAI. To explain this, let's consider a hypothetical case of a Mental Health application powered by ChatGPT. Refer to the accompanying diagram for a visual representation of this concept.</p><p></p><figure><img data-media-urn="urn:li:digitalmediaAsset:D4E12AQGVn3eTbR88JA" src="https://media.licdn.com/dms/image/v2/D4E12AQGVn3eTbR88JA/article-inline_image-shrink_1500_2232/article-inline_image-shrink_1500_2232/0/1703250910071?e=1755734400&amp;v=beta&amp;t=rnSbit2jL9LCcObqYiRGarn-5Dmxmnpaj7s_0ofZnVk"><figcaption></figcaption></figure><p></p><p>Such single layered integrations can have big effects to revenue generating businesses for eg, Chatbots in e-commerce applications. In the case of applications like Instacart using ChatGPT, prompt attacks can indeed disrupt user experience. A misaligned query could yield irrelevant responses, wasting resources and potentially decreasing conversion rates.</p><p>To mitigate this, implementing a layered response system, similar to Google’s Bard or OpenAI’s ChatGPT, is beneficial. This system involves a secondary verification process where the AI double-checks its responses against the application's intended purpose. If a response is off-target, the system prompts the user to refine their query, thereby enhancing both relevance and safety in user interactions.  Refer to the accompanying diagram for a visual representation of this concept.</p><p></p><figure><img data-media-urn="urn:li:digitalmediaAsset:D4E12AQFez32s1wlFsQ" src="https://media.licdn.com/dms/image/v2/D4E12AQFez32s1wlFsQ/article-inline_image-shrink_1500_2232/article-inline_image-shrink_1500_2232/0/1703252462217?e=1755734400&amp;v=beta&amp;t=e-wkM_lPIzmEoy-XtpkfT5_foCgq29UkoamUdGFqSdw"><figcaption></figcaption></figure><p></p><p></p><p>Adding a layer of verification to AI systems might make things a bit more expensive, but it's really important for keeping them safe from bad attacks and making sure they work better. </p><p>As technology keeps growing quickly, it's super important for people who make apps and businesses using AI to keep up with these changes. This way, they can make sure their AI tools are safe, work well, and help them connect better with their customers and run their operations smoothly.</p></div>
+</body>
+</html>
