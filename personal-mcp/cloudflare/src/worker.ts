@@ -69,6 +69,15 @@ class PersonalAIWorker {
       return this.handleConfigDownload();
     }
 
+    // Image endpoints
+    if (path === '/images/profile.jpeg') {
+      return this.handleImageServing('profile');
+    }
+
+    if (path === '/images/main-image.jpeg') {
+      return this.handleImageServing('main');
+    }
+
     // Default: Return API documentation
     return this.handleDocs();
   }
@@ -854,18 +863,14 @@ class PersonalAIWorker {
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
                     <div class="relative">
-                        <div class="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-600 flex items-center justify-center text-white text-lg font-bold shadow-lg animate-glow">
-                            SK
-                        </div>
+                        <img src="/images/profile.jpeg" 
+                             alt="Santhosh Kumar Setty" 
+                             class="w-14 h-14 rounded-full object-cover shadow-lg border-2 border-white/20 animate-glow" />
                         <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
                     </div>
                     <div>
                         <h1 class="text-xl font-bold text-gray-900">Santhosh Kumar Setty</h1>
                         <p class="text-sm text-primary-600 font-medium">Senior AI Product Leader</p>
-                        <div class="flex items-center space-x-2 mt-1">
-                            <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                            <span class="text-xs text-gray-500">Available for AI conversations</span>
-                        </div>
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
@@ -911,8 +916,7 @@ class PersonalAIWorker {
                 <div class="mb-12 animate-fade-in">
                     <div class="relative inline-block">
                         <img 
-                            src="https://i.ibb.co/vCw7xH33/Screenshot-2025-06-03-at-12-23-07.png" 
-                            alt="Personal MCP Server in action with Claude - AI-powered knowledge interface"
+                            src="/images/main-image.jpeg" 
                             class="w-full max-w-4xl mx-auto rounded-2xl shadow-2xl border border-white/20 card-hover"
                             loading="eager"
                         />
@@ -923,7 +927,7 @@ class PersonalAIWorker {
                 <div class="space-y-6 animate-slide-up">
                     <h1 class="text-5xl md:text-6xl font-bold text-gray-900 leading-tight">
                         Welcome to My
-                        <span class="block text-gradient">AI-Powered Knowledge Hub</span>
+                        <span class="block text-gradient">Professional Space</span>
                     </h1>
                     
                     <p class="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed font-light">
@@ -953,56 +957,9 @@ class PersonalAIWorker {
                             <div class="text-sm text-gray-600">Product Leader</div>
                         </div>
                     </div>
-                    
-                    <!-- CTA Button -->
-                    <div class="mt-12">
-                        <a href="#connect" class="group inline-flex items-center px-8 py-4 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
-                            <span>Start AI Conversation</span>
-                            <svg class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                            </svg>
-                        </a>
-                    </div>
                 </div>
             </div>
-        </section> 
-                    alt="Personal MCP Server in action with Claude" 
-                    class="w-full max-w-4xl mx-auto rounded-lg shadow-lg border border-gray-200"
-                />
-            </div>
-            
-            <h1 class="text-5xl font-bold text-gray-900 mb-6 animate-fade-in">
-                Welcome to My AI-Powered
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600"> Workspace</span>
-            </h1>
-            
-            <p class="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed animate-fade-in">
-                Discover my journey in AI and B2B SaaS through an intelligent MCP server that connects you directly 
-                to my GitHub projects, LinkedIn insights, and professional articles. Experience the future of 
-                personal knowledge sharing.
-            </p>
-
-            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in">
-                <div class="flex items-center space-x-2 text-sm text-gray-500">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3.5 6L12 10.5 8.5 8 12 5.5 15.5 8zM12 13.5l3.5 2.5L12 18.5 8.5 16l3.5-2.5z"/>
-                    </svg>
-                    <span>4,725 LinkedIn followers</span>
-                </div>
-                <div class="flex items-center space-x-2 text-sm text-gray-500">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0L19.2 12l-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>
-                    </svg>
-                    <span>500+ connections</span>
-                </div>
-                <div class="flex items-center space-x-2 text-sm text-gray-500">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                    </svg>
-                    <span>AI Product Leader @ Trustana</span>
-                </div>
-            </div>
-        </div>
+        </section>
     </section>
 
     <!-- Setup Instructions -->
@@ -1318,13 +1275,13 @@ console.log(response.choices[0].message);</code></pre>
         </div>
         
         <div class="container mx-auto max-w-6xl relative z-10">
-            <div class="grid md:grid-cols-3 gap-12 mb-12">
+            <div class="grid md:grid-cols-2 gap-12 mb-12">
                 <!-- Brand Section -->
                 <div class="text-center md:text-left">
                     <div class="flex items-center justify-center md:justify-start space-x-3 mb-4">
-                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold text-lg">
-                            SK
-                        </div>
+                        <img src="/images/profile.jpeg" 
+                             alt="Santhosh Kumar Setty" 
+                             class="w-12 h-12 rounded-xl object-cover shadow-lg border-2 border-white/20" />
                         <div>
                             <h3 class="text-xl font-bold">Santhosh Kumar Setty</h3>
                             <p class="text-blue-200">AI Product Leader</p>
@@ -1351,25 +1308,6 @@ console.log(response.choices[0].message);</code></pre>
                             <svg class="w-5 h-5 text-gray-300" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
                             </svg>
-                        </a>
-                    </div>
-                </div>
-                
-                <!-- Quick Links -->
-                <div class="text-center">
-                    <h4 class="text-lg font-bold text-white mb-6">Quick Access</h4>
-                    <div class="space-y-3">
-                        <a href="#connection-methods" class="block text-gray-300 hover:text-white transition-colors duration-300 font-medium">
-                            Connection Guide
-                        </a>
-                        <a href="mailto:santhosh@example.com" class="block text-gray-300 hover:text-white transition-colors duration-300 font-medium">
-                            Contact Me
-                        </a>
-                        <a href="#api-docs" class="block text-gray-300 hover:text-white transition-colors duration-300 font-medium">
-                            API Documentation
-                        </a>
-                        <a href="https://github.com/santhoshkumarsetty/personal-mcp" target="_blank" rel="noopener noreferrer" class="block text-gray-300 hover:text-white transition-colors duration-300 font-medium">
-                            Source Code
                         </a>
                     </div>
                 </div>
@@ -1408,8 +1346,8 @@ console.log(response.choices[0].message);</code></pre>
             
             <!-- Bottom Bar -->
             <div class="border-t border-white/20 pt-8">
-                <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-                    <div class="text-center md:text-left">
+                <div class="flex flex-col items-center space-y-4 text-center">
+                    <div>
                         <p class="text-gray-300 font-medium">
                             © 2025 Santhosh Kumar Setty. Built with AI-powered tools and modern web technologies.
                         </p>
@@ -1417,7 +1355,7 @@ console.log(response.choices[0].message);</code></pre>
                             Berlin, Germany • Product Leader @ Trustana • National University of Singapore Alumni
                         </p>
                     </div>
-                    <div class="flex items-center space-x-4">
+                    <div class="flex items-center justify-center space-x-6">
                         <div class="flex items-center space-x-2 text-sm text-gray-400">
                             <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                             <span>MCP Server Online</span>
@@ -1713,6 +1651,25 @@ document.addEventListener('DOMContentLoaded', function() {
         'Access-Control-Allow-Origin': '*',
       },
     });
+  }
+
+  async handleImageServing(imageType: string): Promise<Response> {
+    // For now, we'll use placeholder images or redirect to external URLs
+    // In a production setup, you would store images in Cloudflare R2
+    
+    const imageUrls = {
+      'profile': 'https://raw.githubusercontent.com/SanthoshSetty/mcp-knowledge-server/main/1688242564790.jpeg',
+      'main': 'https://raw.githubusercontent.com/SanthoshSetty/mcp-knowledge-server/main/1723737750013.jpeg'
+    };
+    
+    const imageUrl = imageUrls[imageType as keyof typeof imageUrls];
+    
+    if (!imageUrl) {
+      return new Response('Image not found', { status: 404 });
+    }
+    
+    // Redirect to the actual image URL for now
+    return Response.redirect(imageUrl, 302);
   }
 
   async handleBridgeDownload(): Promise<Response> {
