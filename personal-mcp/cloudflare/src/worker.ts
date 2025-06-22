@@ -1658,8 +1658,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // In a production setup, you would store images in Cloudflare R2
     
     const imageUrls = {
-      'profile': 'https://raw.githubusercontent.com/SanthoshSetty/mcp-knowledge-server/main/1688242564790.jpeg',
-      'main': 'https://raw.githubusercontent.com/SanthoshSetty/mcp-knowledge-server/main/1723737750013.jpeg'
+      'profile': 'https://raw.githubusercontent.com/SanthoshSetty/mcp-knowledge-server/main/personal-mcp/1688242564790.jpeg',
+      'main': 'https://raw.githubusercontent.com/SanthoshSetty/mcp-knowledge-server/main/personal-mcp/1723737750013.jpeg'
     };
     
     const imageUrl = imageUrls[imageType as keyof typeof imageUrls];
