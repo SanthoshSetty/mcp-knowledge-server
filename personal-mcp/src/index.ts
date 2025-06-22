@@ -64,7 +64,7 @@ class PersonalAIServer {
       tools: [
         {
           name: 'search_personal_knowledge',
-          description: 'Search across all personal knowledge categories (GitHub, LinkedIn, notes, etc.)',
+          description: 'Search across Santhosh Kumar Setty\'s knowledge base (GitHub, LinkedIn, professional experience, skills, etc.)',
           inputSchema: {
             type: 'object',
             properties: {
@@ -88,7 +88,7 @@ class PersonalAIServer {
         },
         {
           name: 'get_github_projects',
-          description: 'Get information about your GitHub repositories and projects',
+          description: 'Get information about Santhosh Kumar Setty\'s GitHub repositories and coding projects',
           inputSchema: {
             type: 'object',
             properties: {
@@ -105,7 +105,7 @@ class PersonalAIServer {
         },
         {
           name: 'get_linkedin_activity',
-          description: 'Retrieve your LinkedIn posts, articles, and professional activity',
+          description: 'Retrieve Santhosh Kumar Setty\'s LinkedIn posts, articles, and professional activity',
           inputSchema: {
             type: 'object',
             properties: {
@@ -124,7 +124,7 @@ class PersonalAIServer {
         },
         {
           name: 'add_personal_knowledge',
-          description: 'Add new knowledge to your personal AI knowledge base',
+          description: 'Add new knowledge to Santhosh Kumar Setty\'s AI knowledge base (admin only)',
           inputSchema: {
             type: 'object',
             properties: {
@@ -156,7 +156,7 @@ class PersonalAIServer {
         },
         {
           name: 'get_personal_timeline',
-          description: 'Get a chronological view of your professional and personal development',
+          description: 'Get a chronological view of Santhosh Kumar Setty\'s professional and personal development',
           inputSchema: {
             type: 'object',
             properties: {
@@ -175,7 +175,7 @@ class PersonalAIServer {
         },
         {
           name: 'analyze_growth_patterns',
-          description: 'Analyze your professional and technical growth patterns',
+          description: 'Analyze Santhosh Kumar Setty\'s professional and technical growth patterns',
           inputSchema: {
             type: 'object',
             properties: {
@@ -190,7 +190,7 @@ class PersonalAIServer {
         },
         {
           name: 'export_github_data',
-          description: 'Export your GitHub repositories data for knowledge base integration',
+          description: 'Export Santhosh Kumar Setty\'s GitHub repositories data for knowledge base integration (admin only)',
           inputSchema: {
             type: 'object',
             properties: {
@@ -209,7 +209,7 @@ class PersonalAIServer {
         },
         {
           name: 'get_professional_profile',
-          description: 'Get comprehensive professional profile and summary',
+          description: 'Get Santhosh Kumar Setty\'s comprehensive professional profile and summary',
           inputSchema: {
             type: 'object',
             properties: {
@@ -223,7 +223,7 @@ class PersonalAIServer {
         },
         {
           name: 'get_work_experience',
-          description: 'Get detailed work experience and career history',
+          description: 'Get Santhosh Kumar Setty\'s detailed work experience and career history',
           inputSchema: {
             type: 'object',
             properties: {
@@ -245,7 +245,7 @@ class PersonalAIServer {
         },
         {
           name: 'get_skills_expertise',
-          description: 'Get skills, competencies, and areas of expertise',
+          description: 'Get Santhosh Kumar Setty\'s skills, competencies, and areas of expertise',
           inputSchema: {
             type: 'object',
             properties: {
@@ -259,7 +259,7 @@ class PersonalAIServer {
         },
         {
           name: 'get_education_background',
-          description: 'Get educational background and qualifications',
+          description: 'Get Santhosh Kumar Setty\'s educational background and qualifications',
           inputSchema: {
             type: 'object',
             properties: {}
@@ -407,6 +407,75 @@ class PersonalAIServer {
     ]);
   }
 
+  private sanitizeData(data: any): any {
+    if (typeof data === 'string') {
+      return this.sanitizeText(data);
+    } else if (Array.isArray(data)) {
+      return data.map(item => this.sanitizeData(item));
+    } else if (data && typeof data === 'object') {
+      const sanitized: any = {};
+      for (const [key, value] of Object.entries(data)) {
+        // Skip potentially sensitive fields entirely
+        if (this.isSensitiveField(key)) {
+          continue;
+        }
+        sanitized[key] = this.sanitizeData(value);
+      }
+      return sanitized;
+    }
+    return data;
+  }
+
+  private sanitizeText(text: string): string {
+    if (!text) return text;
+    
+    // Remove email addresses (comprehensive patterns)
+    text = text.replace(/[\w.-]+@[\w.-]+\.\w+/g, '[EMAIL_REDACTED]');
+    text = text.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '[EMAIL_REDACTED]');
+    
+    // Remove phone numbers (various international formats)
+    text = text.replace(/[\+]?[\d\s\-\(\)\.\+]{7,}/g, '[PHONE_REDACTED]');
+    text = text.replace(/(\+49|0049)\s*\d+[\s\d\-\(\)]+/g, '[PHONE_REDACTED]');
+    
+    // Remove IP addresses
+    text = text.replace(/\b(?:\d{1,3}\.){3}\d{1,3}\b/g, '[IP_REDACTED]');
+    
+    // Remove specific addresses but keep general location
+    text = text.replace(/\b\d+\s+[A-Za-z\s]+(?:Str|Street|Ave|Avenue|Road|Rd)\b/gi, '[ADDRESS_REDACTED]');
+    
+    // Remove postal codes
+    text = text.replace(/\b\d{5}(?:-\d{4})?\b/g, '[POSTAL_CODE_REDACTED]');
+    text = text.replace(/\b[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}\b/gi, '[POSTAL_CODE_REDACTED]');
+    
+    // Remove social security numbers, tax IDs, or similar numeric identifiers
+    text = text.replace(/\b\d{3}-\d{2}-\d{4}\b/g, '[ID_REDACTED]');
+    text = text.replace(/\b\d{9,11}\b/g, '[ID_REDACTED]');
+    
+    // Remove credit card patterns
+    text = text.replace(/\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b/g, '[CARD_REDACTED]');
+    
+    // Remove bank account patterns
+    text = text.replace(/\b[A-Z]{2}\d{2}[\s]?(\d{4}[\s]?){3,7}\d{1,4}\b/gi, '[ACCOUNT_REDACTED]');
+    
+    return text;
+  }
+
+  private isSensitiveField(fieldName: string): boolean {
+    const sensitiveFields = [
+      'email', 'emails', 'emailAddress', 'email_address',
+      'phone', 'phoneNumber', 'phone_number', 'mobile',
+      'address', 'street', 'zipcode', 'postal_code',
+      'ssn', 'social_security', 'tax_id', 'passport',
+      'credit_card', 'bank_account', 'iban', 'swift',
+      'ip_address', 'ip', 'user_agent', 'session_id',
+      'password', 'token', 'api_key', 'secret'
+    ];
+    
+    return sensitiveFields.some(sensitive => 
+      fieldName.toLowerCase().includes(sensitive.toLowerCase())
+    );
+  }
+
   private async searchPersonalKnowledge(args: any) {
     const { query, category, limit = 10 } = args;
     const results: any[] = [];
@@ -428,7 +497,7 @@ class PersonalAIServer {
         text: JSON.stringify({
           query,
           totalResults: results.length,
-          results: results.slice(0, limit)
+          results: this.sanitizeData(results.slice(0, limit))
         }, null, 2)
       }]
     };
@@ -464,7 +533,7 @@ class PersonalAIServer {
         type: 'text',
         text: JSON.stringify({
           totalProjects: projects.length,
-          projects
+          projects: this.sanitizeData(projects)
         }, null, 2)
       }]
     };

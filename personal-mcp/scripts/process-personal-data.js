@@ -20,22 +20,87 @@ class PersonalDataProcessor {
       'certifications': [],
       'recommendations': []
     };
+    
+    // Files that should NEVER be processed (contain sensitive data)
+    this.excludedFiles = [
+      'Email Addresses.csv',
+      'PhoneNumbers.csv', 
+      'Connections.csv',
+      'Contacts.csv',
+      'Security Challenges.csv',
+      'Logins.csv',
+      'messages.csv',
+      'Invitations.csv',
+      'Receipts.csv',
+      'Whatsapp Phone Numbers.csv'
+    ];
   }
 
   // Sanitize personal information
   sanitizePersonalInfo(text) {
     if (!text) return text;
     
-    // Remove email addresses
+    // Remove email addresses (comprehensive patterns)
     text = text.replace(/[\w.-]+@[\w.-]+\.\w+/g, '[EMAIL_REDACTED]');
+    text = text.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '[EMAIL_REDACTED]');
     
-    // Remove phone numbers (various formats)
-    text = text.replace(/[\+]?[\d\s\-\(\)]{10,}/g, '[PHONE_REDACTED]');
+    // Remove phone numbers (various international formats)
+    text = text.replace(/[\+]?[\d\s\-\(\)\.\+]{7,}/g, '[PHONE_REDACTED]');
+    text = text.replace(/(\+49|0049)\s*\d+[\s\d\-\(\)]+/g, '[PHONE_REDACTED]');
+    text = text.replace(/\+\d{10,}/g, '[PHONE_REDACTED]');
+    
+    // Remove IP addresses
+    text = text.replace(/\b(?:\d{1,3}\.){3}\d{1,3}\b/g, '[IP_REDACTED]');
+    
+    // Remove specific addresses but keep general location
+    text = text.replace(/\b\d+\s+[A-Za-z\s]+(?:Str|Street|Ave|Avenue|Road|Rd)\b/gi, '[ADDRESS_REDACTED]');
+    
+    // Remove postal codes
+    text = text.replace(/\b\d{5}(?:-\d{4})?\b/g, '[POSTAL_CODE_REDACTED]');
+    text = text.replace(/\b[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}\b/gi, '[POSTAL_CODE_REDACTED]');
     
     // Remove specific personal identifiers but keep professional context
     text = text.replace(/\b\d{4,}\s*(Berlin|Germany|Singapore)\b/g, 'Berlin, Germany');
     
+    // Remove social security numbers, tax IDs, or similar numeric identifiers
+    text = text.replace(/\b\d{3}-\d{2}-\d{4}\b/g, '[ID_REDACTED]');
+    text = text.replace(/\b\d{9,11}\b/g, '[ID_REDACTED]');
+    
+    // Remove credit card patterns
+    text = text.replace(/\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b/g, '[CARD_REDACTED]');
+    
+    // Remove bank account patterns
+    text = text.replace(/\b[A-Z]{2}\d{2}[\s]?(\d{4}[\s]?){3,7}\d{1,4}\b/gi, '[ACCOUNT_REDACTED]');
+    
+    // Additional safety: Remove any remaining number patterns that could be sensitive
+    text = text.replace(/\b\d{8,}\b/g, '[NUMBER_REDACTED]');
+    
     return text;
+  }
+
+  // Check if a file should be excluded from processing
+  isFileExcluded(fileName) {
+    return this.excludedFiles.includes(fileName);
+  }
+
+  // Validate that no sensitive data is present in the final output
+  validateSanitization(data) {
+    const dataString = JSON.stringify(data);
+    const sensitivePatterns = [
+      /[\w.-]+@[\w.-]+\.\w+/, // Email patterns
+      /\+\d{10,}/, // International phone patterns
+      /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/, // IP patterns
+    ];
+    
+    for (const pattern of sensitivePatterns) {
+      if (pattern.test(dataString)) {
+        // Log the matches for debugging
+        const matches = dataString.match(pattern);
+        console.warn(`⚠️  WARNING: Potential sensitive data detected: ${matches ? matches[0] : 'unknown'}`);
+        return false;
+      }
+    }
+    return true;
   }
 
   async processLinkedInProfile() {
@@ -298,8 +363,14 @@ class PersonalDataProcessor {
       const outputPath = path.join(__dirname, '../data/processed-knowledge-base.json');
       fs.writeFileSync(outputPath, JSON.stringify(this.knowledgeBase, null, 2));
       
+      // Validate that no sensitive data leaked through
+      if (!this.validateSanitization(this.knowledgeBase)) {
+        throw new Error('❌ Sensitive data detected in processed output. Processing aborted.');
+      }
+      
       console.log(`✅ Personal knowledge base saved to: ${outputPath}`);
       console.log(`📊 Total entries processed: ${this.getTotalEntries()}`);
+      console.log(`🔒 Data sanitization validation: PASSED`);
       
       return this.knowledgeBase;
       

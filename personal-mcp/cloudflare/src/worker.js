@@ -214,7 +214,7 @@ class PersonalAIWorker {
                 tools: [
                     {
                         name: 'search_personal_knowledge',
-                        description: 'Search across all personal knowledge categories',
+                        description: 'Search across Santhosh Kumar Setty\'s knowledge base (GitHub, LinkedIn, professional experience, skills, etc.)',
                         inputSchema: {
                             type: 'object',
                             properties: {
@@ -227,7 +227,7 @@ class PersonalAIWorker {
                     },
                     {
                         name: 'get_github_projects',
-                        description: 'Get information about GitHub repositories',
+                        description: 'Get information about Santhosh Kumar Setty\'s GitHub repositories and coding projects',
                         inputSchema: {
                             type: 'object',
                             properties: {
@@ -238,7 +238,7 @@ class PersonalAIWorker {
                     },
                     {
                         name: 'get_linkedin_activity',
-                        description: 'Retrieve LinkedIn posts and activity',
+                        description: 'Retrieve Santhosh Kumar Setty\'s LinkedIn posts, articles, and professional activity',
                         inputSchema: {
                             type: 'object',
                             properties: {
@@ -249,7 +249,7 @@ class PersonalAIWorker {
                     },
                     {
                         name: 'add_personal_knowledge',
-                        description: 'Add new knowledge to the knowledge base',
+                        description: 'Add new knowledge to Santhosh Kumar Setty\'s knowledge base (admin only)',
                         inputSchema: {
                             type: 'object',
                             properties: {
@@ -264,7 +264,7 @@ class PersonalAIWorker {
                     },
                     {
                         name: 'get_personal_timeline',
-                        description: 'Get chronological view of personal development',
+                        description: 'Get chronological view of Santhosh Kumar Setty\'s professional and personal development',
                         inputSchema: {
                             type: 'object',
                             properties: {
@@ -275,7 +275,7 @@ class PersonalAIWorker {
                     },
                     {
                         name: 'analyze_growth_patterns',
-                        description: 'Analyze professional and technical growth patterns',
+                        description: 'Analyze Santhosh Kumar Setty\'s professional and technical growth patterns',
                         inputSchema: {
                             type: 'object',
                             properties: {
@@ -1044,11 +1044,11 @@ class PersonalAIWorker {
                                 <h4 class="font-bold text-xl mb-3 text-gray-900">Test It Out</h4>
                                 <p class="text-gray-700 text-lg mb-4">Try these commands in Claude Desktop:</p>
                                 <div class="bg-gray-900 rounded-xl p-6 space-y-3 font-mono text-sm">
-                                    <p class="text-green-400">• "Search my knowledge base for machine learning"</p>
-                                    <p class="text-blue-400">• "What projects do I have related to TypeScript?"</p>
-                                    <p class="text-purple-400">• "Show me my work experience"</p>
-                                    <p class="text-yellow-400">• "List my technical skills"</p>
-                                    <p class="text-pink-400">• "What certifications do I have?"</p>
+                                    <p class="text-green-400">• "Search Santhosh's knowledge base for machine learning"</p>
+                                    <p class="text-blue-400">• "What projects does Santhosh have related to TypeScript?"</p>
+                                    <p class="text-purple-400">• "Show me Santhosh's work experience"</p>
+                                    <p class="text-yellow-400">• "List Santhosh's technical skills"</p>
+                                    <p class="text-pink-400">• "What certifications does Santhosh have?"</p>
                                 </div>
                             </div>
                         </div>
@@ -1186,31 +1186,6 @@ console.log(response.choices[0].message);</code></pre>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-
-            <!-- Claude Desktop Integration -->
-            <div class="glass-card rounded-3xl p-8">
-                <h3 class="text-2xl font-semibold mb-6 flex items-center text-gray-900">
-                    <span class="text-3xl mr-4">🤖</span>
-                    Claude Desktop Integration
-                </h3>
-                
-                <p class="text-gray-700 text-lg mb-6">Add this to your Claude Desktop config file:</p>
-                
-                <div class="bg-gray-900 rounded-xl p-6 border border-gray-700 overflow-x-auto">
-                    <div class="text-sm text-gray-400 mb-3">File: <code class="text-blue-300">~/Library/Application Support/Claude/claude_desktop_config.json</code></div>
-                    <pre class="text-gray-300 text-sm"><code>{
-  "mcpServers": {
-    "personal-mcp": {
-      "command": "node",
-      "args": ["./mcp-bridge.cjs"],
-      "env": {
-        "SERVER_URL": "https://personal-mcp-worker.santhoshkumar199.workers.dev"
-      }
-    }
-  }
-}</code></pre>
                 </div>
             </div>
         </div>
