@@ -1,0 +1,203 @@
+{
+  "name": "product-enrichment-{{$timestamp}}",
+  "tenant_id": "test-tenant",
+  "run_id": "test-tenant-{{$timestamp}}",
+  "flow_id": "trustana-enrichment-approval-slack",
+  "sw_spec": {
+    "do": [
+      {
+        "fetch_product": {
+          "call": "data_gateway",
+          "with": {
+            "connector_id": "trustana-api",
+            "secret_ref": "test-tenant.secrets.trustana-api",
+            "stream_id": "products",
+            "params": {
+              "max_records": 1
+            }
+          }
+        }
+      },
+      {
+        "enrich_description": {
+          "call": "agent_adapter",
+          "with": {
+            "agent_id": "product-copywriter",
+            "memory_mode": "stateless",
+            "llm_config": {
+              "model": "openai/gpt-5.1",
+              "secret_ref": "test-tenant.secrets.openai",
+              "api_type": "responses",
+              "reasoning": {
+                "effort": "low",
+                "summary": "auto"
+              },
+              "text": {
+                "format": {
+                  "type": "text"
+                },
+                "verbosity": "medium"
+              }
+            },
+            "composite_schema": {
+              "type": "object",
+              "properties": {
+                "enriched_description": {
+                  "type": "string",
+                  "description": "Enhanced product long description"
+                },
+                "key_features": {
+                  "type": "array",
+                  "items": {"type": "string"},
+                  "description": "List of key product features"
+                },
+                "benefits": {
+                  "type": "array",
+                  "items": {"type": "string"},
+                  "description": "List of customer benefits"
+                }
+              },
+              "required": ["enriched_description", "key_features", "benefits"]
+            },
+            "messages": [
+              {
+                "role": "system",
+                "content": "You are a product copywriter. Enhance the product's long description to be more detailed, engaging, and persuasive while maintaining accuracy. Include key features and benefits."
+              },
+              {
+                "role": "user",
+                "content": "${ \"Product: \" + .context.fetch_product.records.products[0].name + \"\\n\\nCurrent Description: \" + (.context.fetch_product.records.products[0].longDescription // \"No description provided\") + \"\\n\\nPlease enrich this product description.\" }"
+              }
+            ],
+            "limits": {
+              "timeout_sec": 180,
+              "max_output_tokens": 4096
+            }
+          }
+        }
+      },
+      {
+        "request_approval": {
+          "call": "external_actions_bridge",
+          "with": {
+            "channel": "api",
+            "channel_config": {
+              "url": "https://webhook.site/your-unique-url",
+              "method": "POST"
+            },
+            "payload": {
+              "workflow_id": "trustana-enrichment-approval-slack",
+              "product_name": "${ .context.fetch_product.records.products[0].name }",
+              "product_id": "${ .context.fetch_product.records.products[0]._id }",
+              "original_description": "${ .context.fetch_product.records.products[0].longDescription // \"\" }",
+              "enriched_description": "${ .context.enrich_description.output.response.enriched_description }",
+              "key_features": "${ .context.enrich_description.output.response.key_features }",
+              "benefits": "${ .context.enrich_description.output.response.benefits }",
+              "message": "Please review and approve the enriched product description",
+              "approval_required": true
+            }
+          }
+        }
+      },
+      {
+        "check_approval": {
+          "switch": [
+            {
+              "approved": {
+                "when": "${ .context.request_approval.payload.approved == true }",
+                "then": "continue"
+              }
+            },
+            {
+              "rejected": {
+                "when": "${ .context.request_approval.payload.approved == false }",
+                "then": "end"
+              }
+            },
+            {
+              "default": {
+                "then": "end"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "send_to_slack": {
+          "call": "external_actions_bridge",
+          "with": {
+            "channel": "slack",
+            "secret_ref": "test-tenant.secrets.slack",
+            "payload": {
+              "channel": "C09M1SAG22E",
+              "text": "Product Description Enrichment Approved",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "${ \"Approved: \" + .context.fetch_product.records.products[0].name }"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "${ \"*Product ID:*\\n\" + .context.fetch_product.records.products[0]._id }"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "${ \"*Approved By:*\\n\" + (.context.request_approval.payload.approver // \"Unknown\") }"
+                    }
+                  ]
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "${ \"*Enriched Description:*\\n\" + .context.enrich_description.output.response.enriched_description }"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "${ \"*Key Features:*\\n- \" + (.context.enrich_description.output.response.key_features | join(\"\\n- \")) }"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "${ \"*Benefits:*\\n- \" + (.context.enrich_description.output.response.benefits | join(\"\\n- \")) }"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "set_result": {
+          "set": {
+            "workflow_result": {
+              "status": "completed",
+              "product_id": "${ .context.fetch_product.records.products[0]._id }",
+              "product_name": "${ .context.fetch_product.records.products[0].name }",
+              "approved": true,
+              "approved_by": "${ .context.request_approval.payload.approver // \"Unknown\" }",
+              "enriched_description": "${ .context.enrich_description.output.response.enriched_description }",
+              "slack_sent": true
+            }
+          }
+        }
+      }
+    ]
+  },
+  "input": {},
+  "metadata": {
+    "source": "workflow-creator",
+    "description": "Fetch first product from Trustana, enrich description with AI, wait for approval, send to Slack if approved"
+  }
+}

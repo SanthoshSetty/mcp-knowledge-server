@@ -1,0 +1,155 @@
+{
+  "name": "localization-{{$timestamp}}",
+  "tenant_id": "test-tenant",
+  "run_id": "test-tenant-{{$timestamp}}",
+  "flow_id": "localization",
+  "sw_spec": {
+    "do": [
+      {
+        "fetch_product": {
+          "call": "data_gateway",
+          "with": {
+            "connector_id": "trustana-api",
+            "secret_ref": "test-tenant.secrets.trustana-api",
+            "stream_id": "products",
+            "params": {
+              "max_records": 1
+            }
+          }
+        }
+      },
+      {
+        "set_translation_config": {
+          "set": {
+            "target_language": "${ .input.target_language // \"Modern Standard Arabic\" }",
+            "fields_to_translate": "${ .input.fields_to_translate // [\"Basic Info//Description\"] }",
+            "transliterate_brand": "${ .input.transliterate_brand // true }",
+            "preserve_html": "${ .input.preserve_html // true }",
+            "reasoning_effort": "${ .input.reasoning_effort // \"low\" }",
+            "glossary": "${ .input.glossary // \"\" }"
+          }
+        }
+      },
+      {
+        "translate_fields": {
+          "call": "agent_adapter",
+          "with": {
+            "agent_id": "product-localizer",
+            "memory_mode": "stateless",
+            "llm_config": {
+              "model": "openai/gpt-5.1",
+              "secret_ref": "test-tenant.secrets.openai",
+              "api_type": "responses",
+              "reasoning": {
+                "effort": "${ .variables.reasoning_effort }",
+                "summary": "auto"
+              },
+              "text": {
+                "format": {
+                  "type": "text"
+                },
+                "verbosity": "medium"
+              }
+            },
+            "composite_schema": {
+              "type": "object",
+              "properties": {
+                "translated_fields": {
+                  "type": "object",
+                  "description": "Object containing field paths as keys and translated text as values",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                },
+                "translation_notes": {
+                  "type": "array",
+                  "items": {"type": "string"},
+                  "description": "Any notes about the translation process or issues encountered"
+                }
+              },
+              "required": ["translated_fields"]
+            },
+            "messages": [
+              {
+                "role": "system",
+                "content": "${ \"You are an expert translator and localization specialist for \" + .variables.target_language + \".\\n\\nKey principles:\\n1. Maintain exact meaning and intent of the original text\\n2. Use natural, fluent \" + .variables.target_language + \" that reads well to native speakers\\n3. Handle technical terminology appropriately\\n4. Preserve all HTML tags and structure - translate only text content between tags\\n5. Transliterate brand names (do not translate them)\\n6. Apply unit/abbreviation replacements from the glossary provided below\\n7. For Arabic translations: No English letters in translated text (except in HTML attributes and E-XXX codes)\\n8. Preserve all numbers exactly as they appear\\n9. If a code starts with E-XXX, leave it unchanged\\n10. For any acronyms not in the glossary, transliterate them letter-by-letter\\n\\n\" + (if .variables.glossary != \"\" then \"=== GLOSSARY (apply these replacements) ===\\n\" + .variables.glossary + \"\\n===\" else \"No glossary provided - use standard translations for units and abbreviations.\" end) }"
+              },
+              {
+                "role": "user",
+                "content": "${ \"Product: \" + .context.fetch_product.records.products[0].name + \"\\nBrand: \" + (.context.fetch_product.records.products[0].brand // \"Unknown\") + \"\\n\\nTranslate the following fields to \" + .variables.target_language + \":\\n\\n\" + (.variables.fields_to_translate | to_entries | map(\"Field: \" + .value + \"\\nOriginal text: \" + ((.context.fetch_product.records.products[0].attributes // []) | map(select(.key == .value)) | .[0].value // \"[Field not found]\")) | join(\"\\n\\n\")) + \"\\n\\nReturn the translated text for each field.\" }"
+              }
+            ],
+            "limits": {
+              "timeout_sec": 180,
+              "max_output_tokens": 8000
+            }
+          }
+        }
+      },
+      {
+        "set_result": {
+          "set": {
+            "workflow_result": {
+              "status": "completed",
+              "product_id": "${ .context.fetch_product.records.products[0]._id }",
+              "product_name": "${ .context.fetch_product.records.products[0].name }",
+              "brand": "${ .context.fetch_product.records.products[0].brand // \"Unknown\" }",
+              "target_language": "${ .variables.target_language }",
+              "translated_fields": "${ .context.translate_fields.output.response.translated_fields }",
+              "translation_notes": "${ .context.translate_fields.output.response.translation_notes // [] }"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "input": {
+    "target_language": "Modern Standard Arabic",
+    "fields_to_translate": ["Basic Info//Description"],
+    "transliterate_brand": true,
+    "preserve_html": true,
+    "reasoning_effort": "low",
+    "glossary": ""
+  },
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "target_language": {
+        "type": "string",
+        "description": "Target language for translation (e.g., 'Modern Standard Arabic', 'French', 'Spanish')",
+        "default": "Modern Standard Arabic"
+      },
+      "fields_to_translate": {
+        "type": "array",
+        "description": "List of attribute paths to translate (e.g., ['Specifications//FAQs_EN', 'Basic Info//Description'])",
+        "items": {"type": "string"}
+      },
+      "transliterate_brand": {
+        "type": "boolean",
+        "description": "If true, transliterate brand name instead of translating",
+        "default": true
+      },
+      "preserve_html": {
+        "type": "boolean",
+        "description": "If true, preserve HTML tags and only translate text content",
+        "default": true
+      },
+      "reasoning_effort": {
+        "type": "string",
+        "description": "GPT-5.1 reasoning effort: 'low' (fast), 'medium' (balanced), 'high' (thorough)",
+        "enum": ["low", "medium", "high"],
+        "default": "low"
+      },
+      "glossary": {
+        "type": "string",
+        "description": "Plain text glossary for unit/abbreviation replacements. Copy-paste format, e.g.:\nV → فولت\nW → واط\nmAh → مللي أمبير ساعة\nUSB → يو إس بي\nOr JSON format: {\"V\": \"فولت\", \"W\": \"واط\"}",
+        "default": ""
+      }
+    },
+    "required": ["fields_to_translate"]
+  },
+  "metadata": {
+    "source": "workflow-creator",
+    "description": "Fetch product from Trustana, translate/transliterate selected fields using GPT-5.1 with configurable reasoning effort"
+  }
+}
