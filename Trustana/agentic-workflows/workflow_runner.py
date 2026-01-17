@@ -764,10 +764,11 @@ Key principles:
 2. Use natural, fluent {target_language} that reads well to native speakers
 3. Handle technical terminology appropriately
 4. Preserve all HTML tags and structure - translate only text content between tags
-5. Transliterate brand names (do not translate them)
+5. Transliterate brand names to Arabic script letter-by-letter (e.g., Oppo → أوبو, Samsung → سامسونج, Apple → أبل)
 6. Apply unit/abbreviation replacements from the glossary provided
-7. For Arabic translations: No English letters in translated text (except in HTML attributes)
+7. For Arabic translations: No English letters in translated text (except in HTML attributes and E-XXX codes)
 8. Preserve all numbers exactly as they appear
+9. For acronyms not in glossary, transliterate them letter-by-letter to Arabic script
 
 {f"=== GLOSSARY ==={chr(10)}{glossary}{chr(10)}===" if glossary else ""}
 
